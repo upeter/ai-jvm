@@ -1,0 +1,155 @@
+% 1. Title: Iris Plants Database
+%
+% 2. Sources:
+%      (a) Creator: R.A. Fisher
+%      (b) Donor: Michael Marshall (MARSHALL%PLU@io.arc.nasa.gov)
+%      (c) Date: July, 1988
+%
+% 3. Past Usage:
+%    - Publications: too many to mention!!!  Here are a few.
+%    1. Fisher,R.A. "The use of multiple measurements in taxonomic problems"
+%       Annual Eugenics, 7, Part II, 179-188 (1936); also in "Contributions
+%       to Mathematical Statistics" (John Wiley, NY, 1950).
+%    2. Duda,R.O., & Hart,P.E. (1973) Pattern Classification and Scene Analysis.
+%       (Q327.D83) John Wiley & Sons.  ISBN 0-471-22361-1.  See page 218.
+%    3. Dasarathy, B.V. (1980) "Nosing Around the Neighborhood: A New System
+%       Structure and Classification Rule for Recognition in Partially Exposed
+%       Environments".  IEEE Transactions on Pattern Analysis and Machine
+%       Intelligence, Vol. PAMI-2, No. 1, 67-71.
+%       -- Results:
+%          -- very low misclassification rates (0% for the setosa class)
+%    4. Gates, G.W. (1972) "The Reduced Nearest Neighbor Rule".  IEEE
+%       Transactions on Information Theory, May 1972, 431-433.
+%       -- Results:
+%          -- very low misclassification rates again
+%    5. See also: 1988 MLC Proceedings, 54-64.  Cheeseman et al's AUTOCLASS II
+%       conceptual clustering system finds 3 classes in the data.
+%
+% 4. Relevant Information:
+%    --- This is perhaps the best known database to be found in the pattern
+%        recognition literature.  Fisher's paper is a classic in the field
+%        and is referenced frequently to this day.  (See Duda & Hart, for
+%        example.)  The data set contains 3 classes of 50 instances each,
+%        where each class refers to a type of iris plant.  One class is
+%        linearly separable from the other 2; the latter are NOT linearly
+%        separable from each other.
+%    --- Predicted attribute: class of iris plant.
+%    --- This is an exceedingly simple domain.
+%
+% 5. Number of Instances: 150 (50 in each of three classes)
+%
+% 6. Number of Attributes: 4 numeric, predictive attributes and the class
+%
+% 7. Attribute Information:
+%    1. sepal length in cm
+%    2. sepal width in cm
+%    3. petal length in cm
+%    4. petal width in cm
+%    5. class:
+%       -- Iris Setosa
+%       -- Iris Versicolour
+%       -- Iris Virginica
+%
+% 8. Missing Attribute Values: None
+%
+% Summary Statistics:
+%  	           Min  Max   Mean    SD   Class Correlation
+%    sepal length: 4.3  7.9   5.84  0.83    0.7826
+%     sepal width: 2.0  4.4   3.05  0.43   -0.4194
+%    petal length: 1.0  6.9   3.76  1.76    0.9490  (high!)
+%     petal width: 0.1  2.5   1.20  0.76    0.9565  (high!)
+%
+% 9. Class Distribution: 33.3% for each of 3 classes.
+
+@RELATION burglaries
+
+@ATTRIBUTE hour	REAL
+@ATTRIBUTE dayOfWeek 	REAL
+@ATTRIBUTE class 	{Breakfast-Time,Lunch-Time,Dinner-Time}
+%Early-Morning-5_7,Breakfast-Time-8_10,Lunch-Time-11_13,Afternoon-14_16,Evening-17_19,Dinner-Time-20_20, Night-21_23,Late-Night-0_4
+
+@DATA
+9,1,Breakfast-Time
+12,1,Lunch-Time
+21,1,Dinner-Time
+9,2,Breakfast-Time
+10,2,Breakfast-Time
+14,2,Lunch-Time
+20,2,Dinner-Time
+8,3,Breakfast-Time
+14,3,Lunch-Time
+22,3,Dinner-Time
+11,4,Lunch-Time
+13,4,Lunch-Time
+19,4,Dinner-Time
+7,5,Breakfast-Time
+17,5,Dinner-Time
+18,5,Dinner-Time
+18,5,Dinner-Time
+23,5,Dinner-Time
+9,6,Breakfast-Time
+18,6,Dinner-Time
+19,6,Dinner-Time
+19,6,Dinner-Time
+19,6,Dinner-Time
+21,6,Dinner-Time
+20,6,Dinner-Time
+20,6,Dinner-Time
+12,7,Lunch-Time
+20,7,Dinner-Time
+13,1,Lunch-Time
+19,1,Dinner-Time
+8,2,Breakfast-Time
+12,2,Lunch-Time
+19,2,Dinner-Time
+9,3,Breakfast-Time
+12,3,Lunch-Time
+20,3,Dinner-Time
+12,4,Lunch-Time
+14,4,Lunch-Time
+17,4,Dinner-Time
+8,5,Breakfast-Time
+18,5,Dinner-Time
+22,5,Dinner-Time
+7,6,Breakfast-Time
+19,6,Dinner-Time
+19,6,Dinner-Time
+20,6,Dinner-Time
+20,6,Dinner-Time
+21,6,Dinner-Time
+12,7,Lunch-Time
+19,7,Dinner-Time
+8,1,Breakfast-Time
+7,1,Breakfast-Time
+6,1,Breakfast-Time
+8,1,Breakfast-Time
+13,1,Lunch-Time
+19,1,Dinner-Time
+8,2,Breakfast-Time
+12,2,Lunch-Time
+19,2,Dinner-Time
+9,3,Breakfast-Time
+12,3,Lunch-Time
+11,3,Lunch-Time
+11,3,Lunch-Time
+20,3,Dinner-Time
+8,4,Breakfast-Time
+8,4,Breakfast-Time
+8,4,Breakfast-Time
+12,4,Lunch-Time
+14,4,Lunch-Time
+17,4,Dinner-Time
+8,5,Breakfast-Time
+18,5,Dinner-Time
+22,5,Dinner-Time
+7,6,Breakfast-Time
+19,6,Dinner-Time
+19,6,Dinner-Time
+21,6,Dinner-Time
+12,7,Lunch-Time
+13,7,Lunch-Time
+19,7,Dinner-Time
+20,7,Dinner-Time
+%
+%
+%

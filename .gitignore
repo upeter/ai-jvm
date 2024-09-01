@@ -1,0 +1,43 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+shell.log
+/langchain4j/build/
+/key/
+/langchain4j/.gradle/
+/langchain4j/src/test/kotlin/dev/example/harvest/
+/langchain4j/src/main/resources/pdfs/
+/spring-ai-samples/src/test/resources/sample.mp3
+/langchain4j/src/main/resources/food/archive (2).zip
+/langchain4j/src/main/resources/food/gz_recipe.csv
