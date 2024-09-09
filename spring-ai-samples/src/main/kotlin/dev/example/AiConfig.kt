@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonClassDescription
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import dev.example.MockWeatherService.Unit
 import dev.example.utils.HttpClientConfig
 import dev.example.utils.RestClientInterceptor
 import org.jetbrains.kotlinx.dataframe.DataFrame
@@ -48,6 +47,11 @@ class AiConfig {
     fun chatClient(builder: ChatClient.Builder): ChatClient {
         return builder.build()
     }
+
+
+    @Bean
+    @Primary
+    fun objectMapper(): ObjectMapper = jacksonObjectMapper()
 
 
     @Bean
@@ -102,24 +106,11 @@ class AiConfig {
 
 
 
-//    @Bean
-//    @Scope("prototype")
-//    fun restClientBuilder(restClientBuilderConfigurer: RestClientBuilderConfigurer): RestClient.Builder {
-//        val builder = RestClient.builder()
-//            .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS))
-//            .requestInterceptor(RestClientInterceptor())
-//        return restClientBuilderConfigurer.configure(builder);
-//    }
+
 
     @Bean
     fun restClientCustomizer(): RestClientCustomizer {
         val clientConfig: HttpClientConfig = HttpClientConfig.builder().logRequests(true).logResponses(true).build()
-//            .connectTimeout(httpClientProperties.getConnectTimeout())
-//            .readTimeout(httpClientProperties.getReadTimeout())
-//            .sslBundle(httpClientProperties.getSslBundle())
-//            .logRequests(httpClientProperties.isLogRequests())
-//            .logResponses(httpClientProperties.isLogResponses())
-//            .build()
 
         return RestClientCustomizer { restClientBuilder ->
             restClientBuilder
@@ -187,71 +178,33 @@ class AiConfig {
     }
 
 
-    @Bean
-    @Description("Get the weather in location") // function description
-    fun weatherService(): java.util.function.Function<Request, Response> {
-        return MockWeatherService()
-    }
+
 
     @Bean
-    @Primary
-    fun objectMapper(): ObjectMapper {
-        return jacksonObjectMapper()
-    }
-
-
-
-//    @Bean
-//    @Description("Order food to given location")
-//    fun foodOrderService(): java.util.function.Function<OrderFoodRequest, OrderFoodResponse> =
-//        AnimalCatchService()
-
-    @Bean
-    fun foodOrderService(): FunctionCallback {
+    fun petCatchService(): FunctionCallback {
         return FunctionCallbackWrapper.builder(AnimalCatchService())
-            .withName("foodOrderService") // (1) function name
-            .withDescription("Order food to given location") // (2) function description
+            .withName("petCatchService") // (1) function name
+            .withDescription("Go catch a runaway pet on given location") // (2) function description
             .withObjectMapper(jacksonObjectMapper())
             .build()
     }
-
-
 }
 
+data class CatchPetRequest(val latitude:String, val longitude:String)
 
+data class CatchPetResponse(val ok:Boolean)
 
+class AnimalCatchService():java.util.function.Function<CatchPetRequest, CatchPetResponse> {
 
-
-//@JsonClassDescription("Order food to location")
-data class OrderFoodRequest(val latitude:String, val longitude:String)
-data class OrderFoodResponse(val ok:Boolean)
-
-
-class AnimalCatchService():java.util.function.Function<OrderFoodRequest, OrderFoodResponse> {
-
-    override fun apply(location: OrderFoodRequest): OrderFoodResponse {
-        logger.info("Catching Animal at location: $location")
-        return OrderFoodResponse(true)
+    override fun apply(location: CatchPetRequest): CatchPetResponse {
+        logger.info(
+                "*******************************************************\n" +
+                "🙀🙀🙀 Catching Animal at location: $location 🙀🙀🙀\n" +
+                "*******************************************************")
+        return CatchPetResponse(true)
     }
 
 }
 
-
-@JvmRecord
-@JsonClassDescription("Get the weather in location")
-data class Request(val location: String, val unit: Unit)
-
-@JvmRecord
-data class Response(val temp: Double, val unit: Unit)
-
-class MockWeatherService : java.util.function.Function<Request, Response> {
-    enum class Unit {
-        C, F
-    }
-
-    override fun apply(request: Request): Response {
-        return Response(30.0, Unit.C)
-    }
-}
 
 

@@ -15,5 +15,7 @@
     <logger name="org.springframework.ai.chat.client.advisor" level="DEBUG">
     </logger>
 
+    <logger name="io.netty.resolver.dns.DnsServerAddressStreamProviders" level="OFF"   > </logger>
+
 
 </configuration>

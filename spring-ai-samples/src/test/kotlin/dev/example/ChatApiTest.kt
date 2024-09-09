@@ -106,3 +106,5 @@ Meringa alla francese (impasto base),Dolci,"[['Albumi', '100g'], ['Zucchero a ve
 Polpette di pesce,Secondi piatti,"[['Merluzzo', '700g'], ['Pane', '100g'], ['Prezzemolo', '1'], ['Timo', 'q.b.'], ['Uova', '2'], ['Aglio', '1'], ['Sale fino', 'q.b.'], ['Pepe nero', 'q.b.'], ['Parmigiano Reggiano DOP', '80g'], ['Farina 00', 'q.b.'], ['Olio di semi di arachide', 'q.b.']]"
 Frittelle di mele,Dolci,"[['Mele verdi', '580g'], ['Succo di limone', '1'], ['Farina 00', '150g'], ['Latte intero', '200g'], ['Uova', '2'], ['Lievito in polvere per dolci', '8g'], ['Sale fino', '1pizzico'], ['Olio di semi', 'q.b.'], ['Zucchero', '30g'], ['Cannella in polvere', 'q.b.']]"
 """
+
+data class ChatRequest(val message: String, val system: String? = null)
