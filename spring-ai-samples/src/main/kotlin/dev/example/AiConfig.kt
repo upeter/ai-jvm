@@ -163,7 +163,7 @@ class AiConfig {
             val count = jdbcTemplate.queryForObject<Int>(sql)
             val startTime = System.currentTimeMillis()
             if (count == 0) {
-                val df = DataFrame.read("langchain4j/src/main/resources/food/recipe_selection_en.csv")
+                val df = DataFrame.read("/Users/urs/development/github/ai/kotlin-ai-talk/langchain4j/src/main/resources/food/recipe_selection_en.csv")
                 val documents = df.map {
                     runCatching {
                         val ingredients = it["Ingredients"].toString().replace("'", "\"")
