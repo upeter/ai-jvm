@@ -18,18 +18,15 @@ import java.util.UUID
 @RestController
 internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorStore: VectorStore, chatMemory: ChatMemory, val openAiAudioSpeechModel: OpenAiAudioSpeechModel) {
 
-
-    val chatClient =  chatClientBuilder
-                .defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
+    private val chatClient =  chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
     @PostMapping("/ai/stream")
-    fun streamCompletion(@RequestBody chatInput: ChatInput): Flow<String> {
-        val response = chatClient.prompt()
+    fun streamCompletion(@RequestBody chatInput: ChatInput): Flow<String> =
+        chatClient.prompt()
             .user(chatInput.message)
             .stream()
             .content()
-        return response.asFlow()
-    }
+            .asFlow()
 
 
     @PostMapping("/ai/chat")
