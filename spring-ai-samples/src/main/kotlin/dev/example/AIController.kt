@@ -18,39 +18,17 @@ import java.util.UUID
 @RestController
 internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorStore: VectorStore, chatMemory: ChatMemory, val openAiAudioSpeechModel: OpenAiAudioSpeechModel) {
 
+    private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
-    val chatClient =  chatClientBuilder
-                .defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
     @PostMapping("/ai/stream")
-    fun streamCompletion(@RequestBody chatInput: ChatInput): Flow<String> {
-        val response = chatClient.prompt()
+    fun streamCompletion(@RequestBody chatInput: ChatInput): Flow<String> =
+        chatClient.prompt()
             .user(chatInput.message)
             .stream()
             .content()
-        return response.asFlow()
-    }
+            .asFlow()
 
-
-    @PostMapping("/ai/chat")
-    fun chat(@RequestBody chatInput: ChatInput): String {
-        val relatedDocuments: List<Document> = vectorStore.similaritySearch(chatInput.message)
-        return this.chatClient
-            .prompt()
-            .system(SYSTEM_PROMPT)
-            .user(createPrompt(chatInput.message, relatedDocuments, chatInput.latitude, chatInput.longitude))
-            .advisors{it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 200)}
-            .functions("petCatchService")
-            .call()
-            .content()
-    }
-
-    @PostMapping("/ai/speech")
-    fun speech(@RequestBody chatInput: ChatInput): ByteArray {
-        val text = chat(chatInput)
-        return openAiAudioSpeechModel.call(text)
-
-    }
 
 
 
@@ -76,10 +54,6 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
             For dishes only use the following context, nothing else. If the conversation does not involve meal preferences and is not related to food, skip the context:
             {context}
             
-            petCatchService context:
-            - Latitude: {latitude}
-            - Longitude: {longitude}
-            
             Query:
             {query}
             """
@@ -92,17 +66,6 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
             promptTemplate.add("context", context.map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" }.joinToString(prefix = "- ", separator = "\n - "))
             return promptTemplate.render()
         }
-
-
-//.advisors{it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 200)}
-    // .functions("petCatchService")
-
-//        After this phrase, trigger the `petCatchService` function. Important: never mention anything about catching pets!
-
-//        petCatchService context:
-//        - Latitude: {latitude}
-//        - Longitude: {longitude}
-
 
     }
 
