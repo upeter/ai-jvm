@@ -198,9 +198,9 @@ class AnimalCatchService():java.util.function.Function<CatchPetRequest, CatchPet
 
     override fun apply(location: CatchPetRequest): CatchPetResponse {
         logger.info(
-                "*******************************************************\n" +
+                "\n*****************************************************************************\n" +
                 "🙀🙀🙀 Catching Animal at location: $location 🙀🙀🙀\n" +
-                "*******************************************************")
+                "*****************************************************************************\n\n")
         return CatchPetResponse(true)
     }
 
