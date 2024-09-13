@@ -22,7 +22,6 @@ import org.springframework.ai.openai.api.OpenAiAudioApi
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.AudioResponseFormat
 import org.springframework.ai.openai.api.OpenAiAudioApi.TranscriptResponseFormat
 import org.springframework.ai.openai.api.OpenAiImageApi
-import org.springframework.ai.openai.api.common.OpenAiApiConstants
 import org.springframework.ai.retry.RetryUtils
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Value
@@ -57,7 +56,7 @@ class AiConfig {
     @Bean
     fun openAiAudioApi(@Value("#{environment.OPENAI_API_KEY}") key: String, restClientBuilder: RestClient.Builder) =
         OpenAiAudioApi(
-            OpenAiApiConstants.DEFAULT_BASE_URL, key, restClientBuilder, RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER
+            "https://api.openai.com", key, restClientBuilder, RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER
         )
 
 
@@ -161,13 +160,13 @@ class AiConfig {
                         val content = """${it["Name"]} ${it["Category"]} ${
                             mapper.readValue<List<List<String>>>(ingredients).map { it[0] }
                         }"""
-                        Document.builder().withContent(content).withMetadata(
+                        Document(content,
                             mapOf(
                                 "Name" to it["Name"].toString(),
                                 "Category" to it["Category"].toString(),
                                 "Ingredients" to it["Ingredients"].toString()
                             )
-                        ).build()
+                        )
                     }.getOrNull()
                 }.filterNotNull()
 

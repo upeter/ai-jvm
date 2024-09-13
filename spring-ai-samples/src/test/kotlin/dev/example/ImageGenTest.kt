@@ -7,8 +7,6 @@ import org.springframework.ai.image.ImageResponse
 import org.springframework.ai.openai.OpenAiAudioSpeechModel
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel
 import org.springframework.ai.openai.audio.speech.SpeechPrompt
-import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt
-import org.springframework.ai.audio.transcription.AudioTranscriptionResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
@@ -16,6 +14,7 @@ import org.springframework.core.io.Resource
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt
 import javax.sound.sampled.LineEvent
 import javax.sound.sampled.LineListener
 
@@ -57,7 +56,7 @@ class TextToSpeechTest @Autowired constructor(
     @Test
     fun `transcribe mp3`() {
         //playMp3(audioFile.inputStream)
-        val response: AudioTranscriptionResponse = transcriptionModel.call(AudioTranscriptionPrompt(audioFile))
+        val response = transcriptionModel.call(AudioTranscriptionPrompt(audioFile))
         val text = response.result.output
         println(text)
     }
