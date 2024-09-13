@@ -7,17 +7,22 @@ import dev.example.ColorPrinter.cprintln
 import dev.example.ReplyType.AUDIO
 import dev.example.ReplyType.TEXT
 import kotlinx.coroutines.flow.Flow
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToFlow
+import reactor.netty.resources.ConnectionProvider
 import java.io.ByteArrayInputStream
 import java.util.*
+import java.time.*
+import org.springframework.http.client.reactive.*
+import reactor.netty.http.client.HttpClient
 
 
 suspend fun main() {
     var communicationProfile = CommunicationProfile()
-    val webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).build()
+    val webClient = WebClient.builder().exchangeStrategies(exchangeStrategies).clientConnector(provider).build()
     Scanner(System.`in`).use { scanner ->
         while (true) {
             cprint(BLUE, "User: ")
@@ -54,8 +59,18 @@ suspend fun main() {
 val exchangeStrategies = ExchangeStrategies.builder()
     .codecs { configurer ->
         configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) // 10 MB
+
     }
+
     .build()
+
+val provider = ReactorClientHttpConnector(
+    HttpClient.create(ConnectionProvider.builder("fixed")
+.maxConnections(500)
+.maxIdleTime(Duration.ofSeconds(20))
+.maxLifeTime(Duration.ofSeconds(60))
+.pendingAcquireTimeout(Duration.ofSeconds(60))
+.evictInBackground(Duration.ofSeconds(120)).build()))
 
 
 fun WebClient.streamingChat(chatRequest: ChatInput): Flow<String> {
