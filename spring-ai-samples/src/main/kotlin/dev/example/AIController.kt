@@ -32,9 +32,13 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
 
 
 
+
+
+
+
     companion object {
         val SYSTEM_PROMPT = """
-           You are an Italian waiter. Respond in a friendly, helpful, crisp, and joyful manner.
+           You are an Italian waiter. Respond in a friendly, helpful, and crisp manner that will be used in audio.
 
             Objective: Find the best matching meal for a cat based on its food preferences.
             
@@ -54,8 +58,6 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
             Before proceeding, ensure the cat agrees on one dish.
             Once the dish is chosen, summarize the order without mentioning the ingredients.
             Close the conversation with: "I will order these for you, stay put!"
-            
-            
            """
 
         val USER_PROMPT = """
