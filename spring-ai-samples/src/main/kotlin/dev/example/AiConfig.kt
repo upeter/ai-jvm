@@ -1,6 +1,5 @@
 package dev.example
 
-import com.fasterxml.jackson.annotation.JsonClassDescription
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -32,7 +31,6 @@ import org.springframework.boot.web.client.ClientHttpRequestFactorySettings
 import org.springframework.boot.web.client.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Description
 import org.springframework.context.annotation.Primary
 import org.springframework.http.client.BufferingClientHttpRequestFactory
 import org.springframework.jdbc.core.JdbcTemplate
@@ -187,6 +185,15 @@ class AiConfig {
             .withObjectMapper(jacksonObjectMapper())
             .build()
     }
+
+    @Bean
+    fun menuService(vectorStore: VectorStore): FunctionCallback {
+        return FunctionCallbackWrapper.builder(MenuService(vectorStore))
+            .withName("menuService") // (1) function name
+            .withDescription("Find matching dishes based on dish name or ingredients") // (2) function description
+            .withObjectMapper(jacksonObjectMapper())
+            .build()
+    }
 }
 
 data class CatchPetRequest(val latitude:String, val longitude:String)
@@ -204,6 +211,24 @@ class AnimalCatchService():java.util.function.Function<CatchPetRequest, CatchPet
     }
 
 }
+
+
+data class MenuRequest(val dish:String)
+
+data class MenuResponse(val menus:List<String>)
+
+class MenuService(val vectorStore: VectorStore):java.util.function.Function<MenuRequest, MenuResponse> {
+
+    override fun apply(dish:MenuRequest): MenuResponse {
+        logger.info(
+            "\n-------------------------------------------------------------\n" +
+                    "🧑‍🍳Calling menu service 🧑‍🍳\n" +
+                    "-------------------------------------------------------------\n\n")
+        return MenuResponse(vectorStore.similaritySearch(dish.dish).map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
+    }
+
+}
+
 
 
 
