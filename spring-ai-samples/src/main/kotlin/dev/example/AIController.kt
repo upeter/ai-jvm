@@ -21,10 +21,10 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
     private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
 
-    @PostMapping("/ai/stream")
-    fun streamCompletion(@RequestBody chatInput: ChatInput): Flow<String> =
+    @GetMapping("/ai/stream")
+    fun streamCompletion(@RequestParam("message") prompt:String): Flow<String> =
         chatClient.prompt()
-            .user(chatInput.message)
+            .user(prompt)
             .stream()
             .content()
             .asFlow()
