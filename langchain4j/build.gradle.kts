@@ -24,7 +24,7 @@ object Versions {
     const val spring_ai_version = "1.0.0-SNAPSHOT"
     const val jackson_version = "2.14.2"
     const val arrow_version = "1.2.4"
-    const val langchain4j = "0.33.0"
+    const val langchain4j = "0.35.0"
     const val spring_ai = "0.8.1"
     const val pgvector = "0.1.3"
     const val postgresql = "42.6.0"
@@ -113,6 +113,10 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:${Versions.langchain4j}") {
         exclude("ch.qos.logback", "logback-classic")
     }
+    implementation("dev.langchain4j:langchain4j-spring-boot-starter:${Versions.langchain4j}") {
+        exclude("ch.qos.logback", "logback-classic")
+    }
+
     implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.langchain4j}")
     implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j}")
     implementation("dev.langchain4j:langchain4j-pgvector:${Versions.langchain4j}")
@@ -120,6 +124,7 @@ dependencies {
     implementation("com.pgvector:pgvector:${Versions.pgvector}")
     implementation("org.postgresql:postgresql:${Versions.postgresql}")
     implementation("dev.langchain4j:langchain4j-open-ai:${Versions.langchain4j}")
+    implementation("dev.langchain4j:langchain4j-reactor:${Versions.langchain4j}")
 
 
 
