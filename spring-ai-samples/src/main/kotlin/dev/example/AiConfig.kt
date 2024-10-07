@@ -176,6 +176,15 @@ class AiConfig {
         }
     }
 
+    @Bean
+    fun menuService(vectorStore: VectorStore): FunctionCallback {
+        return FunctionCallbackWrapper.builder(MenuService(vectorStore))
+            .withName("menuService") // (1) function name
+            .withDescription("Find matching dishes based on dish name or ingredients") // (2) function description
+            .withObjectMapper(jacksonObjectMapper())
+            .build()
+    }
+
 
 
 
@@ -201,6 +210,33 @@ class AnimalCatchService():java.util.function.Function<CatchPetRequest, CatchPet
                 "🙀🙀🙀 Catching Animal at location: $location 🙀🙀🙀\n" +
                 "*****************************************************************************\n\n")
         return CatchPetResponse(true)
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+data class MenuRequest(val dish:String)
+
+data class MenuResponse(val menus:List<String>)
+
+class MenuService(val vectorStore: VectorStore):java.util.function.Function<MenuRequest, MenuResponse> {
+
+    override fun apply(dish:MenuRequest): MenuResponse {
+        logger.info(
+            "\n-------------------------------------------------------------\n" +
+                    "🧑‍🍳Calling menu service 🧑‍🍳\n" +
+                    "-------------------------------------------------------------\n\n")
+        return MenuResponse(vectorStore.similaritySearch(dish.dish).map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
     }
 
 }
