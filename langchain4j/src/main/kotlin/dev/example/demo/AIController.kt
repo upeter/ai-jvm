@@ -1,14 +1,11 @@
 package dev.example.demo
 
-import dev.langchain4j.data.message.AiMessage
-import dev.langchain4j.data.message.UserMessage
-import dev.langchain4j.model.StreamingResponseHandler
 import dev.langchain4j.model.chat.ChatLanguageModel
 import dev.langchain4j.model.chat.StreamingChatLanguageModel
-import kotlinx.coroutines.reactive.asFlow
-import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Sinks
-import kotlinx.coroutines.flow.Flow
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
 
 @RestController
 class AIController(
@@ -18,32 +15,18 @@ class AIController(
     val streamingAssistant: StreamingAssistant,
 ) {
 
-    @GetMapping("/ai/stream")
-    fun streamCompletion(@RequestParam("message") message:String): Flow<String> {
-        return streamingAssistant.chat(message).asFlow()
-    //return streamingChatModel.generateStream(UserMessage(message))
+    @GetMapping("/ai/ask")
+    fun simpleChat(@RequestParam("message") message:String): String {
+        return chatLanguageModel.generate(message)
     }
 
-//chatLanguageModel.generate(UserMessage(message)).content().text()
-        //assistant.chat(message).also { println(it) }
-
-
+    @GetMapping("/ai/stream")
+    fun streamChat(@RequestParam("message") message:String): Flux<String> {
+        return streamingAssistant.chat(message)
+    }
 
 
 }
 
-fun StreamingChatLanguageModel.generateStream(message: UserMessage):Flow<String> {
-    val sink: Sinks.Many<String> = Sinks.many().unicast().onBackpressureBuffer()
-    this.generate(message, object : StreamingResponseHandler<AiMessage> {
-        override fun onNext(token: String) {
-            sink.tryEmitNext(token)
-        }
 
-        override fun onError(error: Throwable) {
-            sink.tryEmitError(error)
-        }
-    })
-
-    return sink.asFlux().asFlow()
-}
 
