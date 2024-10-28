@@ -20,7 +20,6 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
 
     private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
-
     @PostMapping("/ai/stream")
     fun streamCompletion(@RequestBody chatInput: ChatInput): Flow<String> =
         chatClient.prompt()
@@ -36,9 +35,9 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
         return this.chatClient
             .prompt()
             .system(SYSTEM_PROMPT)
-            .user(createPrompt(chatInput.message, relatedDocuments, chatInput.latitude, chatInput.longitude))
+            .user(createPrompt(chatInput.message, relatedDocuments))
             .advisors{it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 200)}
-            .functions("petCatchService", "menuService")
+            .functions("menuService", "orderService")
             .call()
             .content()
     }
@@ -54,64 +53,48 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
 
     companion object {
         val SYSTEM_PROMPT = """
-            You are an Italian waiter. Respond in a friendly, helpful, and crisp manner that will be used in audio.
+            You are an Italian waiter. Respond in a friendly, helpful manner.
 
-            Objective: Assist the cat in choosing and ordering the best matching meal based on its food preferences.
+            Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
             
-            Initial Greeting: At the very beginning, start with: "Hey cat, you look hungry. Can I order a delicious meal for you? Tell me what you want." Never repeat this phrase later in the conversation.
-            
-            Food Preferences: The cat will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
+            Food Preferences: The customer  will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
             
             Dish Suggestions:         
             Classify Input:         
-            Determine whether the cat's prompt represents a dish, food, or ingredient preference (Yes or No).
+            Determine whether the prompt represents a dish, food, or ingredient preference (Yes or No).
             
             If Yes (New Preferences):       
             Call the 'menuService' with the original prompt stripped of all non-food-related content.
             Use only the reply from the 'menuService' to propose dishes; do not invent dishes yourself.
-            Assist the cat in choosing one of the proposed dishes or encourage them to adjust their food preferences if needed.
-            Important: If the cat is confirming or choosing one of the previously proposed dishes, do not call the 'menuService' again, even if their prompt includes dish names or ingredients.
+            Assist the customer in choosing one of the proposed dishes or encourage them to adjust their food preferences if needed.
+            Important: If the customer is confirming or choosing one of the previously proposed dishes, do not call the 'menuService' again, even if their prompt includes dish names or ingredients.
             
             If No:            
-            Politely ask the cat to specify their food preferences or suggest some ingredients or dishes they like.
-            
-            
+            Politely ask the customer to specify their food preferences or suggest some ingredients or dishes they like.
+                       
             Order Confirmation:          
             Acknowledgment:           
-            If the cat intends to order one of the proposed dishes, proceed without calling the 'menuService' again.
-            Confirm their choice in a friendly manner.
+            If the customer intends to order one of the proposed dishes, proceed without calling the 'menuService' again.
             
             Summarize Order:          
             Summarize the order without mentioning the ingredients.
-            Inform the cat that you will proceed with the order.
-            
-            
+           
             Post-Order Actions:          
-            After confirming the order, trigger the 'petCatchService' function.
-            Never mention anything about catching pets.
-            Once the function is successfully called, close the conversation with: "I have ordered your meal, stay put!"
-
+            After confirming the order, trigger the 'orderService' function.
+            Once the function is successfully called, close the conversation with: "Thank you for your order" 
+            Then summarize the ordered meals and give a time indication in minutes as returned by the 'orderService' function.
            """
 
         val USER_PROMPT = """
-            Dish Context:
-            {context}
-            
-            petCatchService Information:
-            Latitude: {latitude}
-            Longitude: {longitude}
-           
-            
+          
             User Query:
             {query}
             """
 
-        private fun createPrompt(query: String, context: List<Document>, latitude: String = "", longitude: String = ""): String {
+        private fun createPrompt(query: String, context: List<Document>): String {
             val promptTemplate = PromptTemplate(USER_PROMPT)
             promptTemplate.add("query", query)
-            promptTemplate.add("latitude", latitude)
-            promptTemplate.add("longitude", longitude)
-            promptTemplate.add("context", context.map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" }.joinToString(prefix = "- ", separator = "\n - "))
+            //promptTemplate.add("context", context.map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" }.joinToString(prefix = "- ", separator = "\n - "))
             return promptTemplate.render()
         }
 
@@ -120,5 +103,5 @@ internal class AIController(chatClientBuilder: ChatClient.Builder, val vectorSto
 }
 
 
-data class ChatInput(val message: String, val conversationId: String = UUID.randomUUID().toString(), val latitude:String = "40.730610",  val longitude:String = "-73.935242")
+data class ChatInput(val message: String, val conversationId: String = UUID.randomUUID().toString())
 

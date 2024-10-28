@@ -105,7 +105,7 @@ data class CommunicationProfile(
 suspend fun WebClient.handleAudioChat(userMessage: String, conversationId: String) {
     println()
     cprintln(ColorPrinter.Color.RED, "Agent: 🔈")
-    this.audioChat(ChatInput(userMessage, conversationId, latitude = "-70.432", longitude = "40.8")).also {
+    this.audioChat(ChatInput(userMessage, conversationId)).also {
         playMp3(ByteArrayInputStream(it))
     }
     println()
@@ -115,7 +115,7 @@ suspend fun WebClient.handleAudioChat(userMessage: String, conversationId: Strin
 suspend fun WebClient.handleTextChat(userMessage: String, conversationId: String) {
     println()
     cprintln(ColorPrinter.Color.RED, "Agent:")
-    this.streamingChat(ChatInput(userMessage, conversationId, latitude = "-70.432", longitude = "40.8")).collect {
+    this.streamingChat(ChatInput(userMessage, conversationId)).collect {
         cprintln(ColorPrinter.Color.BLACK, it)
     }
     println()

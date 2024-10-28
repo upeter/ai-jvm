@@ -178,10 +178,10 @@ class AiConfig {
 
 
     @Bean
-    fun petCatchService(): FunctionCallback {
-        return FunctionCallbackWrapper.builder(AnimalCatchService())
-            .withName("petCatchService") // (1) function name
-            .withDescription("Go catch a runaway pet on given location") // (2) function description
+    fun orderService(): FunctionCallback {
+        return FunctionCallbackWrapper.builder(OrderService())
+            .withName("orderService") // (1) function name
+            .withDescription("Order meal for customer") // (2) function description
             .withObjectMapper(jacksonObjectMapper())
             .build()
     }
@@ -196,18 +196,18 @@ class AiConfig {
     }
 }
 
-data class CatchPetRequest(val latitude:String, val longitude:String)
+data class OrderRequest(val meals:List<String>)
 
-data class CatchPetResponse(val ok:Boolean)
+data class OrderResponse(val deliveredInMinutes:Int)
 
-class AnimalCatchService():java.util.function.Function<CatchPetRequest, CatchPetResponse> {
+class OrderService():java.util.function.Function<OrderRequest, OrderResponse> {
 
-    override fun apply(location: CatchPetRequest): CatchPetResponse {
+    override fun apply(orderRequest: OrderRequest): OrderResponse {
         logger.info(
                 "\n*****************************************************************************\n" +
-                "🙀🙀🙀 Catching Animal at location: $location 🙀🙀🙀\n" +
+                "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
                 "*****************************************************************************\n\n")
-        return CatchPetResponse(true)
+        return OrderResponse(20)
     }
 
 }
