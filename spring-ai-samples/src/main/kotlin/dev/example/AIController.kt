@@ -127,6 +127,8 @@ data class ChatInput(val message: String, val conversationId: String = UUID.rand
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Dishes(val dishes:List<Dish>)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Dish (val dish: String, val ingredients: List<String>)
+
 

@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
+
 @RestController
 public class SpringAISampleController {
 
@@ -64,11 +67,17 @@ public class SpringAISampleController {
 
 
     private static final String SYSTEM_PROMPT = """
-             You are an Italian waiter. Respond in a friendly, helpful yet crisp manner always in English.
+             You are an Italian waiter. Respond in a friendly, helpful yet crisp manner which is used in audio always in English.
+             
+             Conversation Start:
+             At the very beginning you must start the conversation with: 'Welcome to Italian DelAIght! How can I help you today?' 
+             Never repeat this phrase after again.          
             
-             Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
+             Objective: 
+             Assist the customer in choosing and ordering the best matching meal based on given food preferences.
             
-             Food Preferences: The customer will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
+             Food Preferences: 
+             The customer will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
             
              Dish Suggestions:
              Use the context provided in the user message under 'Dish Context'.
@@ -80,7 +89,7 @@ public class SpringAISampleController {
             User Query:
             {query}
             
-            For dishes use the following context:
+            Dish Context:
             {context}""";
 
 

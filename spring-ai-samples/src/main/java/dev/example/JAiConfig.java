@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Description;
 public class JAiConfig {
 
     @Bean
-    @Description("Order meal for customer") // function description
+    @Description("Order dish for customer") // function description
     public OrderService orderService() {
         return new OrderService();
     }

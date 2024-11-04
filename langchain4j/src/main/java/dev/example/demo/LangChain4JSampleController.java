@@ -1,4 +1,4 @@
-package dev.example;
+package dev.example.demo;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import org.springframework.web.bind.annotation.GetMapping;
