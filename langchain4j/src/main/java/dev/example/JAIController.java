@@ -20,13 +20,4 @@ public class JAIController {
         this.streamingAssistant = streamingAssistant;
     }
 
-    @GetMapping("/ai/ask")
-    public String simpleChat(@RequestParam("message") String message) {
-        return chatLanguageModel.generate(message);
-    }
-
-    @GetMapping("/ai/stream")
-    public Flux<String> streamChat(@RequestParam("message") String message) {
-        return streamingAssistant.chat(message);
-    }
 }
