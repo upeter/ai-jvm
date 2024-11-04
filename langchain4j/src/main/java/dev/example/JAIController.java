@@ -13,14 +13,10 @@ import reactor.core.publisher.Flux;
 public class JAIController {
 
     private final ChatLanguageModel chatLanguageModel;
-    private final StreamingChatLanguageModel streamingChatModel;
-    private final SimpleChatAssistant assistant;
     private final StreamChatAssistant streamingAssistant;
 
-    public JAIController(ChatLanguageModel chatLanguageModel, StreamingChatLanguageModel streamingChatModel, SimpleChatAssistant assistant, StreamChatAssistant streamingAssistant) {
+    public JAIController(ChatLanguageModel chatLanguageModel, StreamChatAssistant streamingAssistant) {
         this.chatLanguageModel = chatLanguageModel;
-        this.streamingChatModel = streamingChatModel;
-        this.assistant = assistant;
         this.streamingAssistant = streamingAssistant;
     }
 

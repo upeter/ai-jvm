@@ -77,6 +77,7 @@ public class JAIController {
                 .user(createPrompt(chatInput.message(), relatedDocuments))
                 .advisors(it -> it.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId())
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50))
+                .functions("orderService")
                 .call()
                 .content();
     }

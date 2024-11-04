@@ -177,54 +177,54 @@ class AiConfig {
 
 
 
-    @Bean
-    fun orderService(): FunctionCallback {
-        return FunctionCallbackWrapper.builder(OrderService())
-            .withName("orderService") // (1) function name
-            .withDescription("Order meal for customer") // (2) function description
-            .withObjectMapper(jacksonObjectMapper())
-            .build()
-    }
-
-    @Bean
-    fun menuService(vectorStore: VectorStore): FunctionCallback {
-        return FunctionCallbackWrapper.builder(MenuService(vectorStore))
-            .withName("menuService") // (1) function name
-            .withDescription("Find matching dishes based on dish name or ingredients") // (2) function description
-            .withObjectMapper(jacksonObjectMapper())
-            .build()
-    }
+//    @Bean
+//    fun orderService(): FunctionCallback {
+//        return FunctionCallbackWrapper.builder(KOrderService())
+//            .withName("orderService") // (1) function name
+//            .withDescription("Order meal for customer") // (2) function description
+//            .withObjectMapper(jacksonObjectMapper())
+//            .build()
+//    }
+//
+//    @Bean
+//    fun menuService(vectorStore: VectorStore): FunctionCallback {
+//        return FunctionCallbackWrapper.builder(KMenuService(vectorStore))
+//            .withName("menuService") // (1) function name
+//            .withDescription("Find matching dishes based on dish name or ingredients") // (2) function description
+//            .withObjectMapper(jacksonObjectMapper())
+//            .build()
+//    }
 }
 
-data class OrderRequest(val meals:List<String>)
+data class KOrderRequest(val meals:List<String>)
 
-data class OrderResponse(val deliveredInMinutes:Int)
+data class KOrderResponse(val deliveredInMinutes:Int)
 
-class OrderService():java.util.function.Function<OrderRequest, OrderResponse> {
+class KOrderService():java.util.function.Function<KOrderRequest, KOrderResponse> {
 
-    override fun apply(orderRequest: OrderRequest): OrderResponse {
+    override fun apply(orderRequest: KOrderRequest): KOrderResponse {
         logger.info(
                 "\n*****************************************************************************\n" +
                 "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
                 "*****************************************************************************\n\n")
-        return OrderResponse(20)
+        return KOrderResponse(20)
     }
 
 }
 
 
-data class MenuRequest(val dish:String)
+data class KMenuRequest(val dish:String)
 
-data class MenuResponse(val menus:List<String>)
+data class KMenuResponse(val menus:List<String>)
 
-class MenuService(val vectorStore: VectorStore):java.util.function.Function<MenuRequest, MenuResponse> {
+class KMenuService(val vectorStore: VectorStore):java.util.function.Function<KMenuRequest, KMenuResponse> {
 
-    override fun apply(dish:MenuRequest): MenuResponse {
+    override fun apply(dish:KMenuRequest): KMenuResponse {
         logger.info(
             "\n-------------------------------------------------------------\n" +
                     "🧑‍🍳Calling menu service 🧑‍🍳\n" +
                     "-------------------------------------------------------------\n\n")
-        return MenuResponse(vectorStore.similaritySearch(dish.dish).map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
+        return KMenuResponse(vectorStore.similaritySearch(dish.dish).map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
     }
 
 }
