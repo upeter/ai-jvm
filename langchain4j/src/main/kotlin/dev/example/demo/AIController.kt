@@ -15,12 +15,12 @@ class AIController(
     val streamingAssistant: StreamingAssistant,
 ) {
 
-    @GetMapping("/ai/ask")
+    @GetMapping("/kai/ask")
     fun simpleChat(@RequestParam("message") message:String): String {
         return chatLanguageModel.generate(message)
     }
 
-    @GetMapping("/ai/stream")
+    @GetMapping("/kai/stream")
     fun streamChat(@RequestParam("message") message:String): Flux<String> {
         return streamingAssistant.chat(message)
     }

@@ -33,7 +33,7 @@ internal class AIController(
 
     private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
-    @GetMapping("/ai/stream")
+    @GetMapping("/kai/stream")
     fun simplePrompt(@RequestParam("message") message: String): Flux<String> =
         chatClient.prompt()
             .user(message)
@@ -41,7 +41,7 @@ internal class AIController(
             .content()
 
 
-    @GetMapping("/ai/top-dishes-per-kitchen")
+    @GetMapping("/kai/top-dishes-per-kitchen")
     fun simplePromptWithConversion(@RequestParam("kitchen") kitchen: String): Dishes =
         chatClient.prompt()
             .user{
@@ -52,7 +52,7 @@ internal class AIController(
 
 
 
-    @GetMapping("/ai/media-prompt")
+    @GetMapping("/kai/media-prompt")
     fun mediaPrompt(@RequestParam("url") url: URL): Flux<String> =
         chatClient.prompt()
             .user{it.text("Detect all the objects in the image")
@@ -64,7 +64,7 @@ internal class AIController(
 
 
 
-    @PostMapping("/ai/chat")
+    @PostMapping("/kai/chat")
     fun chat(@RequestBody chatInput: ChatInput): String {
         val relatedDocuments: List<Document> = vectorStore.similaritySearch(chatInput.message)
         return this.chatClient
@@ -79,7 +79,7 @@ internal class AIController(
 
 
 
-    @PostMapping("/ai/speech")
+    @PostMapping("/kai/speech")
     fun speech(@RequestBody chatInput: ChatInput): ByteArray {
         val text = chat(chatInput)
         return openAiAudioSpeechModel.call(text)
