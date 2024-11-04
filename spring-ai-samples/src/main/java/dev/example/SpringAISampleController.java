@@ -20,13 +20,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-public class JAIController {
+public class SpringAISampleController {
 
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
     private final OpenAiAudioSpeechModel openAiAudioSpeechModel;
 
-    public JAIController(ChatClient.Builder chatClientBuilder, VectorStore vectorStore, ChatMemory chatMemory, OpenAiAudioSpeechModel openAiAudioSpeechModel) {
+    public SpringAISampleController(ChatClient.Builder chatClientBuilder, VectorStore vectorStore, ChatMemory chatMemory, OpenAiAudioSpeechModel openAiAudioSpeechModel) {
         this.chatClient = chatClientBuilder.defaultAdvisors(new SimpleLoggerAdvisor()).build();//, new MessageChatMemoryAdvisor(chatMemory)).build();
         this.vectorStore = vectorStore;
         this.openAiAudioSpeechModel = openAiAudioSpeechModel;
