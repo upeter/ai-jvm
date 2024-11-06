@@ -55,6 +55,12 @@ plugins {
 dependencies {
     ksp("io.arrow-kt:arrow-optics-ksp-plugin:${Versions.arrow_version}")
 
+    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:${Versions.langchain4j}") {
+        exclude("ch.qos.logback", "logback-classic")
+    }
+    implementation("dev.langchain4j:langchain4j-spring-boot-starter:${Versions.langchain4j}") {
+        exclude("ch.qos.logback", "logback-classic")
+    }
 
     implementation("org.jsoup:jsoup:1.14.3")
 
@@ -107,15 +113,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${Versions.kotlinx_version}")
 
     implementation("com.github.haifengl:smile-core:3.1.1")
-//    implementation("nz.ac.waikato.cms.weka:weka-stable:3.8.6")
 
     implementation("dev.langchain4j:langchain4j:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:${Versions.langchain4j}") {
-        exclude("ch.qos.logback", "logback-classic")
-    }
-    implementation("dev.langchain4j:langchain4j-spring-boot-starter:${Versions.langchain4j}") {
-        exclude("ch.qos.logback", "logback-classic")
-    }
 
     implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.langchain4j}")
     implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j}")
