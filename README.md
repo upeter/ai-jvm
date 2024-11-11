@@ -35,5 +35,5 @@
 
 
 #### Run CLI Chat Client
-- Run CLI Chat Client `main` in `ChatClient.kt` in the `spring-ai` module
+- Run CLI Chat Client `main` in  [ChatClient.kt](spring-ai/src/test/kotlin/dev/example/ChatClient.kt) in the `spring-ai` module
 - Type `help` to see the available commands
