@@ -28,7 +28,7 @@
 
 #### Run SpringAI sample application
 - Provide the OpenAI key OPENAI_API_KEY in the environment
-- Start docker-compose: docker-compose up
+- Start docker-compose: `docker-compose up`
 - Run application: [SpringAIDemoApplication.kt](spring-ai/src/main/kotlin/dev/example/SpringAIDemoApplication.kt)
   - The first time it takes a while since the vector db is ingested using the spring-ai way
 - Run Samples in the notebook: [spring-ai-demo.ipynb](spring-ai/spring-ai-demo.ipynb)
