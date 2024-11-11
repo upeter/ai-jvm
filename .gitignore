@@ -38,6 +38,6 @@ shell.log
 /langchain4j/.gradle/
 /langchain4j/src/test/kotlin/dev/example/harvest/
 /langchain4j/src/main/resources/pdfs/
-/spring-ai-samples/src/test/resources/sample.mp3
+/spring-ai/src/test/resources/sample.mp3
 /langchain4j/src/main/resources/food/archive (2).zip
 /langchain4j/src/main/resources/food/gz_recipe.csv
