@@ -12,6 +12,7 @@
 #### Run LangChain4J sample application
 - Provide the OpenAI key OPENAI_API_KEY in the environment
 - Run application: [LangChain4JDemoApplication.kt](langchain4j/src/main/kotlin/dev/example/LangChain4JDemoApplication.kt)
+- Run Samples in the notebook: [langchain4j-demo.ipynb](langchain4j/langchain4j-demo.ipynb)
 
 #### Data Ingestion
 - Start docker-compose: `docker-compose up`
@@ -23,6 +24,8 @@
 #### Run SpringAI sample application
 - Provide the OpenAI key OPENAI_API_KEY in the environment
 - Run application: [SpringAIDemoApplication.kt](spring-ai/src/main/kotlin/dev/example/SpringAIDemoApplication.kt)
+- - Run Samples in the notebook: [spring-ai-demo.ipynb](spring-ai/spring-ai-demo.ipynb)
+
 
 #### Run CLI Chat Client
 - Run CLI Chat Client `main` in `ChatClient.kt` in the `spring-ai` module
