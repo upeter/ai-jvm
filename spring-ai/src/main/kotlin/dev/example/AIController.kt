@@ -42,13 +42,13 @@ internal class AIController(
 
 
     @GetMapping("/kai/top-dishes-per-kitchen")
-    fun simplePromptWithConversion(@RequestParam("kitchen") kitchen: String): Dishes =
+    fun simplePromptWithConversion(@RequestParam("kitchen") kitchen: String): Dishes? =
         chatClient.prompt()
             .user{
                 it.text("Select the most wanted dishes for the following kitchen: {kitchen} with the main ingredients")
                 .param("kitchen", kitchen)}
             .call()
-            .entity<Dishes>()
+            .entity<Dishes?>()
 
 
 
@@ -65,8 +65,8 @@ internal class AIController(
 
 
     @PostMapping("/kai/chat")
-    fun chat(@RequestBody chatInput: ChatInput): String {
-        val relatedDocuments: List<Document> = vectorStore.similaritySearch(chatInput.message)
+    fun chat(@RequestBody chatInput: ChatInput): String? {
+        val relatedDocuments = vectorStore.similaritySearch(chatInput.message).orEmpty()
         return this.chatClient
             .prompt()
             .system(SYSTEM_PROMPT)
@@ -116,7 +116,7 @@ internal class AIController(
             return promptTemplate.render()
         }
 
-        inline fun <reified T> ChatClient.CallResponseSpec.entity(): T =
+        inline fun <reified T> ChatClient.CallResponseSpec.entity(): T? =
             entity(object: StructuredOutputConverter<T> by BeanOutputConverter(object:ParameterizedTypeReference<T>(){}, jacksonObjectMapper()) {})
     }
 

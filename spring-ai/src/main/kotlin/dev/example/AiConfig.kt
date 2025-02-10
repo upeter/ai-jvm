@@ -220,7 +220,7 @@ class MenuService(val vectorStore: VectorStore):java.util.function.Function<Menu
             "\n-------------------------------------------------------------\n" +
                     "🧑‍🍳Calling menu service 🧑‍🍳\n" +
                     "-------------------------------------------------------------\n\n")
-        return MenuResponse(vectorStore.similaritySearch(dish.dish).map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
+        return MenuResponse(vectorStore.similaritySearch(dish.dish).orEmpty().mapNotNull { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
     }
 
 }
