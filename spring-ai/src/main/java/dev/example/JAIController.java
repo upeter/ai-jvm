@@ -77,6 +77,7 @@ public class JAIController {
                 .user(createPrompt(chatInput.message(), relatedDocuments))
                 .advisors(it -> it.param(AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId())
                         .param(AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50))
+                .functions("orderService")
                 .call()
                 .content();
     }
@@ -100,25 +101,41 @@ public class JAIController {
 
 
 
+    private static String createPrompt(String query) {
+        PromptTemplate promptTemplate = new PromptTemplate(USER_PROMPT);
+        promptTemplate.add("query", query);
+        return promptTemplate.render();
+    }
+
 
     private static final String SYSTEM_PROMPT = """
-             You are an Italian waiter. Respond in a friendly, helpful yet crisp manner always in English.
-            
-             Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
-            
-             Food Preferences: The customer will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
-            
-             Dish Suggestions:
-             Use the context provided in the user message under 'Dish Context'.
-             Only propose dishes from this context; do not invent dishes yourself. Propose all the possible options from the context.
-             Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
-            """;
+            You are an Italian waiter. Respond in a friendly, helpful manner always in English.
+
+            Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
+           
+            Initial Greeting: Always start the conversation with: Welcome to Italian DelAIght! How can I help you today?
+           
+            Food Preferences: The customer  will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
+
+            Dish Suggestions:
+            Use the context provided in the user message under 'Dish Context'.
+            Only propose dishes from this context; do not invent dishes yourself. Propose all the possible options from the context.
+            Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
+  
+                Order:
+                When the client has made a choice trigger the 'orderService' function.
+              
+                Once the function is successfully called, close the conversation with: "Thank you for your order"
+                
+                Then summarize the ordered dishes without mentioning the ingredients and give a
+                time indication in minutes as returned by the 'orderService' function.
+           """;
 
     private static final String USER_PROMPT = """
             User Query:
             {query}
             
-            For dishes use the following context:
+            Dish context:
             {context}""";
 
 
