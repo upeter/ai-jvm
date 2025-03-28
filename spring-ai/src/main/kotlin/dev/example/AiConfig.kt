@@ -1,5 +1,6 @@
 package dev.example
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -14,25 +15,24 @@ import org.springframework.ai.document.Document
 import org.springframework.ai.image.ImageModel
 import org.springframework.ai.image.ImageOptions
 import org.springframework.ai.image.ImageOptionsBuilder
-import org.springframework.ai.model.function.FunctionCallback
-import org.springframework.ai.model.function.FunctionCallbackWrapper
 import org.springframework.ai.openai.*
 import org.springframework.ai.openai.api.OpenAiAudioApi
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.AudioResponseFormat
 import org.springframework.ai.openai.api.OpenAiAudioApi.TranscriptResponseFormat
 import org.springframework.ai.openai.api.OpenAiImageApi
 import org.springframework.ai.retry.RetryUtils
+import org.springframework.ai.tool.ToolCallback
+import org.springframework.ai.tool.function.FunctionToolCallback
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
-import org.springframework.boot.web.client.ClientHttpRequestFactories
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings
 import org.springframework.boot.web.client.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.http.client.BufferingClientHttpRequestFactory
+import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.queryForObject
 import org.springframework.web.client.RestClient
@@ -48,25 +48,23 @@ class AiConfig {
 
     @Bean
     @Primary
-    fun objectMapper(): ObjectMapper = jacksonObjectMapper()
+    fun objectMapper(): ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 
     @Bean
     fun openAiAudioApi(@Value("#{environment.OPENAI_API_KEY}") key: String, restClientBuilder: RestClient.Builder) =
-        OpenAiAudioApi(
-            "https://api.openai.com", key, restClientBuilder, RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER
-        )
+        OpenAiAudioApi.Builder().baseUrl("https://api.openai.com").apiKey(key).restClientBuilder(restClientBuilder).responseErrorHandler(RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER).build()
 
 
     @Bean
     fun transcriptionOptions(): OpenAiAudioTranscriptionOptions {
         return OpenAiAudioTranscriptionOptions.builder()
-            .withLanguage("en")
-            .withPrompt("Create transcription for this audio file.")
-            .withTemperature(0f)
-            //.withResponseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
-            .withModel("whisper-1")
-            .withResponseFormat(TranscriptResponseFormat.JSON)
+            .language("en")
+            .prompt("Create transcription for this audio file.")
+            .temperature(0f)
+            //.responseFormat(OpenAiAudioApi.TranscriptResponseFormat.TEXT)
+            .model("whisper-1")
+            .responseFormat(TranscriptResponseFormat.JSON)
             .build()
     }
 
@@ -78,10 +76,10 @@ class AiConfig {
 
     @Bean
     fun speachOptions(): OpenAiAudioSpeechOptions = OpenAiAudioSpeechOptions.builder()
-        .withModel(OpenAiAudioApi.TtsModel.TTS_1.getValue())
-        .withResponseFormat(AudioResponseFormat.MP3)
-        .withVoice(OpenAiAudioApi.SpeechRequest.Voice.ALLOY)
-        .withSpeed(1.0f)
+        .model(OpenAiAudioApi.TtsModel.TTS_1.getValue())
+        .responseFormat(AudioResponseFormat.MP3)
+        .voice(OpenAiAudioApi.SpeechRequest.Voice.ALLOY)
+        .speed(1.0f)
         .build()
 
     @Bean
@@ -90,14 +88,14 @@ class AiConfig {
 
     @Bean
     fun imageOptions(): ImageOptions = ImageOptionsBuilder.builder()
-        .withModel("dall-e-3")
-        .withHeight(1024)
-        .withWidth(1024)
+        .model("dall-e-3")
+        .height(1024)
+        .width(1024)
         .build()
 
     @Bean
     fun imageModel(@Value("#{environment.OPENAI_API_KEY}") apiKey: String): ImageModel {
-        return OpenAiImageModel(OpenAiImageApi(apiKey))
+        return OpenAiImageModel(OpenAiImageApi.Builder().apiKey(apiKey).build())
     }
 
 
@@ -110,20 +108,18 @@ class AiConfig {
         val clientConfig: HttpClientConfig = HttpClientConfig.builder().logRequests(true).logResponses(true).build()
 
         return RestClientCustomizer { restClientBuilder ->
+            val requestFactory = BufferingClientHttpRequestFactory(
+                SimpleClientHttpRequestFactory().apply {
+                    setConnectTimeout(clientConfig.connectTimeout)
+                    setReadTimeout(clientConfig.readTimeout)
+                }
+            )
+
             restClientBuilder
-                .requestFactory(
-                    BufferingClientHttpRequestFactory(
-                        ClientHttpRequestFactories.get(
-                            ClientHttpRequestFactorySettings.DEFAULTS
-                                .withConnectTimeout(clientConfig.connectTimeout)
-                                .withReadTimeout(clientConfig.readTimeout)
-                        )
-                    )
-                )
+                .requestFactory(requestFactory)
                 .requestInterceptors { interceptors ->
                     if (clientConfig.logRequests || clientConfig.logResponses) {
-                        interceptors.add(RestClientInterceptor()
-                        )
+                        interceptors.add(RestClientInterceptor())
                     }
                 }
         }
@@ -132,6 +128,7 @@ class AiConfig {
 
     @Bean
     fun chatMemory() = InMemoryChatMemory()
+
 
     /**
      * https://dev.to/mcadariu/springai-llama3-and-pgvector-bragging-rights-2n8o
@@ -174,20 +171,19 @@ class AiConfig {
 
 
     @Bean
-    fun orderService(): FunctionCallback {
-        return FunctionCallbackWrapper.builder(OrderService())
-            .withName("orderService") // (1) function name
-            .withDescription("Order meal for customer") // (2) function description
-            .withObjectMapper(jacksonObjectMapper())
+    fun orderService(): ToolCallback {
+        return FunctionToolCallback.builder("orderService", OrderService())
+            .inputType(OrderRequest::class.java)
+            .description("Order meal for customer") // (2) function description
+            //.withObjectMapper(jacksonObjectMapper())
             .build()
     }
 
     @Bean
-    fun menuService(vectorStore: VectorStore): FunctionCallback {
-        return FunctionCallbackWrapper.builder(MenuService(vectorStore))
-            .withName("menuService") // (1) function name
-            .withDescription("Find matching dishes based on dish name or ingredients") // (2) function description
-            .withObjectMapper(jacksonObjectMapper())
+    fun menuService(vectorStore: VectorStore): ToolCallback {
+        return FunctionToolCallback.builder("menuService",  MenuService(vectorStore))
+            .inputType(MenuRequest::class.java)
+            .description("Find matching dishes based on dish name or ingredients") // (2) function description
             .build()
     }
 }
@@ -220,7 +216,7 @@ class MenuService(val vectorStore: VectorStore):java.util.function.Function<Menu
             "\n-------------------------------------------------------------\n" +
                     "🧑‍🍳Calling menu service 🧑‍🍳\n" +
                     "-------------------------------------------------------------\n\n")
-        return MenuResponse(vectorStore.similaritySearch(dish.dish).orEmpty().mapNotNull { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" })
+        return MenuResponse(vectorStore.similaritySearch(dish.dish).orEmpty().mapNotNull { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.text}" })
     }
 
 }

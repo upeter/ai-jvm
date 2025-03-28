@@ -93,7 +93,7 @@ public class JAIController {
         PromptTemplate promptTemplate = new PromptTemplate(USER_PROMPT);
         promptTemplate.add("query", query);
         promptTemplate.add("context", context.stream()
-                .map(doc -> "Dish: " + doc.getMetadata().get("Name") + " Dish with Ingredients: " + doc.getContent())
+                .map(doc -> "Dish: " + doc.getMetadata().get("Name") + " Dish with Ingredients: " + doc.getText())
                 .collect(Collectors.joining("\n - ", "- ", "")));
         return promptTemplate.render();
     }

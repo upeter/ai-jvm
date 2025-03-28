@@ -112,7 +112,7 @@ internal class AIController(
         private fun createPrompt(query: String, context: List<Document>): String {
             val promptTemplate = PromptTemplate(USER_PROMPT)
             promptTemplate.add("query", query)
-            promptTemplate.add("context", context.map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.content}" }.joinToString(prefix = "- ", separator = "\n - "))
+            promptTemplate.add("context", context.map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.text}" }.joinToString(prefix = "- ", separator = "\n - "))
             return promptTemplate.render()
         }
 
