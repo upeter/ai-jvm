@@ -162,7 +162,7 @@ class AiConfig {
                 }.filterNotNull()
 
                 vectorStore.accept(documents)
-                logger.info("Time taken to load Recepies: {} ms", System.currentTimeMillis() - startTime)
+                logger.info("Time taken to load Recipies: {} ms", System.currentTimeMillis() - startTime)
             }
         }
     }
@@ -174,8 +174,7 @@ class AiConfig {
     fun orderService(): ToolCallback {
         return FunctionToolCallback.builder("orderService", OrderService())
             .inputType(OrderRequest::class.java)
-            .description("Order meal for customer") // (2) function description
-            //.withObjectMapper(jacksonObjectMapper())
+            .description("Order meal for customer")
             .build()
     }
 
@@ -183,7 +182,7 @@ class AiConfig {
     fun menuService(vectorStore: VectorStore): ToolCallback {
         return FunctionToolCallback.builder("menuService",  MenuService(vectorStore))
             .inputType(MenuRequest::class.java)
-            .description("Find matching dishes based on dish name or ingredients") // (2) function description
+            .description("Find matching dishes based on dish name or ingredients")
             .build()
     }
 }

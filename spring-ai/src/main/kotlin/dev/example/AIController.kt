@@ -33,7 +33,7 @@ internal class AIController(
 
     private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
-    @GetMapping("/kai/stream")
+    @GetMapping("/ai/stream")
     fun simplePrompt(@RequestParam("message") message: String): Flux<String> =
         chatClient.prompt()
             .user(message)
@@ -41,7 +41,7 @@ internal class AIController(
             .content()
 
 
-    @GetMapping("/kai/top-dishes-per-kitchen")
+    @GetMapping("/ai/top-dishes-per-kitchen")
     fun simplePromptWithConversion(@RequestParam("kitchen") kitchen: String): Dishes? =
         chatClient.prompt()
             .user{
@@ -52,7 +52,7 @@ internal class AIController(
 
 
 
-    @GetMapping("/kai/media-prompt")
+    @GetMapping("/ai/media-prompt")
     fun mediaPrompt(@RequestParam("url") url: URL): Flux<String> =
         chatClient.prompt()
             .user{it.text("Detect all the objects in the image")
@@ -64,22 +64,23 @@ internal class AIController(
 
 
 
-    @PostMapping("/kai/chat")
+    @PostMapping("/ai/chat")
     fun chat(@RequestBody chatInput: ChatInput): String? {
-        val relatedDocuments = vectorStore.similaritySearch(chatInput.message).orEmpty()
+        val relatedDocuments = vectorStore
+            .similaritySearch(chatInput.message).orEmpty()
         return this.chatClient
             .prompt()
             .system(SYSTEM_PROMPT)
             .user(createPrompt(chatInput.message, relatedDocuments))
-            .advisors{it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
-                .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
+            .advisors{
+                it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
+                  .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
+            .tools("orderService")
             .call()
             .content()
     }
 
-
-
-    @PostMapping("/kai/speech")
+    @PostMapping("/ai/speech")
     fun speech(@RequestBody chatInput: ChatInput): ByteArray {
         val text = chat(chatInput)
         return openAiAudioSpeechModel.call(text)
@@ -87,27 +88,36 @@ internal class AIController(
 
 
     companion object {
-        val SYSTEM_PROMPT = """
-            You are an Italian waiter. Respond in a friendly, helpful yet crisp manner always in English.
+        const val SYSTEM_PROMPT = """
+        You are an Italian waiter. Respond in a friendly, helpful manner always in English.
 
-            Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
-            
-            Food Preferences: The customer will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
+        Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
 
-            Dish Suggestions:
-            Use the context provided in the user message under 'Dish Context'.
-            Only propose dishes from this context; do not invent dishes yourself. Propose all the possible options from the context.
-            Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
-       
-           """
+        Initial Greeting: Always start the initial conversation with: 'Welcome to Italian DelAIght! How can I help you today?'. Don't use this phrase later in the conversation. 
+
+        Food Preferences: The customer  will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
+
+        Dish Suggestions:
+        Only if the user input is about food preferences use the context provided in the user message under 'Dish Context'.
+        Only propose dishes from this context; do not invent dishes yourself. Propose ALL the possible options from the context.
+        Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
+
+        Order:
+        When the client has made a choice trigger the 'orderService' function.
+
+        Once the function is successfully called, close the conversation with: "Thank you for your order"
+
+        Then summarize the ordered dishes without mentioning the ingredients and give a
+        time indication in minutes as returned by the 'orderService' function.
+        """
 
 
         val USER_PROMPT = """       
            User Query:
            {query}
-            
-           For dishes use the following context:
-           {context}"""
+
+        Dish context:
+        {context}"""
 
         private fun createPrompt(query: String, context: List<Document>): String {
             val promptTemplate = PromptTemplate(USER_PROMPT)
