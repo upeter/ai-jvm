@@ -13,17 +13,11 @@ import reactor.core.publisher.Flux
 
 @RestController
 class AIController(
-    val chatLanguageModel: ChatLanguageModel,
-    val streamingAssistant: StreamingAssistant) {
+    val chatLanguageModel: ChatLanguageModel) {
 
 
 }
 
-@AiService
-fun interface StreamingAssistant {
-    @SystemMessage("You are a polite assistant")
-    fun chat(userMessage: String): Flux<String>
-}
 
 
 
