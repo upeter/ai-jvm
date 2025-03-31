@@ -14,16 +14,8 @@ import reactor.core.publisher.Flux
 @RestController
 class AIController(
     val chatLanguageModel: ChatLanguageModel,
-    val assistant: Assistant,
     val streamingAssistant: StreamingAssistant) {
 
-    @GetMapping("/ai/ask")
-    fun simpleChat(@RequestParam("message") message:String): String =
-        assistant.chat(message)
-
-    @GetMapping("/ai/ask/stream")
-    fun streamChat(@RequestParam("message") message:String): Flow<String> =
-        streamingAssistant.chat(message).asFlow()
 
 }
 
@@ -34,10 +26,5 @@ fun interface StreamingAssistant {
 }
 
 
-@AiService
-fun interface Assistant {
-    @SystemMessage("You are a polite assistant")
-    fun chat(userMessage: String): String
-}
 
 
