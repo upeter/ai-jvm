@@ -28,10 +28,25 @@ import java.util.UUID
 
 @RestController
 internal class AIController(
-    @Value("classpath:italian-food.png") val image:Resource,
     chatClientBuilder: ChatClient.Builder, val vectorStore: VectorStore, chatMemory: ChatMemory, val openAiAudioSpeechModel: OpenAiAudioSpeechModel) {
 
     private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
