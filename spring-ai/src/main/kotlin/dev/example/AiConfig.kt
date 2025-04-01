@@ -178,13 +178,6 @@ class AiConfig {
             .build()
     }
 
-    @Bean
-    fun menuService(vectorStore: VectorStore): ToolCallback {
-        return FunctionToolCallback.builder("menuService",  MenuService(vectorStore))
-            .inputType(MenuRequest::class.java)
-            .description("Find matching dishes based on dish name or ingredients")
-            .build()
-    }
 }
 
 data class OrderRequest(val meals:List<String>)
@@ -204,21 +197,12 @@ class OrderService():java.util.function.Function<OrderRequest, OrderResponse> {
 }
 
 
-data class MenuRequest(val dish:String)
 
-data class MenuResponse(val menus:List<String>)
 
-class MenuService(val vectorStore: VectorStore):java.util.function.Function<MenuRequest, MenuResponse> {
 
-    override fun apply(dish:MenuRequest): MenuResponse {
-        logger.info(
-            "\n-------------------------------------------------------------\n" +
-                    "🧑‍🍳Calling menu service 🧑‍🍳\n" +
-                    "-------------------------------------------------------------\n\n")
-        return MenuResponse(vectorStore.similaritySearch(dish.dish).orEmpty().mapNotNull { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.text}" })
-    }
 
-}
+
+
 
 
 
