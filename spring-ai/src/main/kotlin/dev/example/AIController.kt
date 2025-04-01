@@ -32,8 +32,12 @@ internal class AIController(
 
     private val chatClient = chatClientBuilder.defaultAdvisors( SimpleLoggerAdvisor(), MessageChatMemoryAdvisor(chatMemory)).build()
 
-
-
+    @GetMapping("/ai/stream")
+    fun simplePrompt(@RequestParam("message") message: String): Flux<String> =
+        chatClient.prompt()
+            .user(message)
+            .stream()
+            .content()
 
 
 
