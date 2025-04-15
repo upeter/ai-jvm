@@ -1,0 +1,278 @@
+### Category: Desserts
+- Meal: Tiramisu
+    - Ingredients: Mascarpone
+- Meal: Cookies
+    - Ingredients: Flour
+- Meal: Pancakes with Maple Syrup
+    - Ingredients: Butter
+- Meal: Mascarpone Cream
+    - Ingredients: Mascarpone
+- Meal: Sweet and Savory Crepes (Basic Recipe)
+    - Ingredients: Eggs
+- Meal: Gingerbread Cookies
+    - Ingredients: Ground ginger
+- Meal: New York Cheesecake
+    - Ingredients: Digestive biscuits
+- Meal: Molten Chocolate Cake
+    - Ingredients: 70% dark chocolate
+- Meal: Pastry Cream
+    - Ingredients: Whole milk
+- Meal: Nutella Crepes
+    - Ingredients: Eggs
+- Meal: Chocolate Chip Muffins
+    - Ingredients: Butter
+- Meal: Sicilian Cannoli
+    - Ingredients: Flour
+- Meal: Tenerina Cake
+    - Ingredients: Dark chocolate
+- Meal: Brownies
+    - Ingredients: Dark chocolate
+- Meal: Wine Cookies
+    - Ingredients: White wine
+- Meal: Apple Cake
+    - Ingredients: Renette apples
+- Meal: French Toast
+    - Ingredients: Eggs
+- Meal: Fluffy Brioche Leavened Cake
+    - Ingredients: Manitoba flour
+- Meal: Shortcrust Pastry
+    - Ingredients: Eggs
+- Meal: Chocolate Muffins
+    - Ingredients: Unsweetened Cocoa Powder
+- Meal: Caprese Cake
+    - Ingredients: Dark Chocolate 50%
+- Meal: Red Velvet Cake
+    - Ingredients: Butter
+- Meal: Chocolate Profiteroles
+    - Ingredients: Water
+- Meal: 7 Jars Cake
+    - Ingredients: Natural Plain Yogurt
+- Meal: Christmas Almond Cookies
+    - Ingredients: Flour
+- Meal: Chocolate Salami
+    - Ingredients: Dark Chocolate
+- Meal: Macarons
+    - Ingredients: Almond Flour
+- Meal: Apple Strudel
+    - Ingredients: Flour
+- Meal: Pan di Spagna
+    - Ingredients: Eggs
+- Meal: Biscotti con gocce di cioccolato
+    - Ingredients: Chocolate chips
+- Meal: Waffle
+    - Ingredients: Flour
+- Meal: Biscotti semplici decorati
+    - Ingredients: Flour
+- Meal: Cream tart
+    - Ingredients: Flour
+- Meal: Crostata alla Nutella
+    - Ingredients: Butter
+- Meal: Rotolo alla Nutella
+    - Ingredients: Eggs
+- Meal: Torta al cioccolato
+    - Ingredients: Dark chocolate
+- Meal: Casetta di pan di spezie
+    - Ingredients: Flour
+- Meal: Plumcake allo yogurt
+    - Ingredients: Flour
+- Meal: Biscotti allo yogurt
+    - Ingredients: Flour
+- Meal: Canestrelli
+    - Ingredients: Flour
+- Meal: Dolcetti al cocco
+    - Ingredients: Desiccated coconut
+- Meal: Cioccolata calda
+    - Ingredients: Whole milk
+- Meal: Baci di dama
+    - Ingredients: Butter
+- Meal: Pasta frolla morbida
+    - Ingredients: Flour
+- Meal: Crostata alla frutta
+    - Ingredients: Egg yolks
+- Meal: Tarte tatin
+    - Ingredients: Chantecler apples
+- Meal: Dorayaki
+    - Ingredients: Water
+- Meal: Apricot jam tart
+    - Ingredients: Flour
+- Meal: Hot milk cake
+    - Ingredients: Whole milk
+- Meal: Almond brittle
+    - Ingredients: Peeled almonds
+- Meal: Cat's tongues
+    - Ingredients: Butter
+- Meal: Praline almonds
+    - Ingredients: Almonds
+- Meal: Eggless tiramisu
+    - Ingredients: Fresh cream
+- Meal: Puff pastry
+    - Ingredients: Flour
+- Meal: Black forest cake
+    - Ingredients: Eggs
+- Meal: Yogurt cake
+    - Ingredients: Greek yogurt
+- Meal: Pan di Stelle cake
+    - Ingredients: Cookies
+- Meal: Biscuit dough
+    - Ingredients: Eggs
+- Meal: Christmas star (cookies)
+    - Ingredients: Flour
+- Meal: Nutellotti
+    - Ingredients: Nutella
+- Meal: Nutella cheesecake
+    - Ingredients: Digestive biscuits
+- Meal: French meringue (base dough)
+    - Ingredients: Egg whites
+- Meal: Apple fritters
+    - Ingredients: Green apples
+
+
+### Category: Main courses
+- Meal: Lasagna Bolognese
+    - Ingredients: Remilled durum wheat semolina
+- Meal: Spaghetti Carbonara
+    - Ingredients: Spaghetti
+- Meal: Spaghetti with Clams
+    - Ingredients: Spaghetti
+- Meal: Braised Beef in Barolo
+    - Ingredients: Beef
+- Meal: Spaghetti Amatriciana
+    - Ingredients: Spaghetti
+- Meal: Fresh Egg Pasta (Dough and Shapes)
+    - Ingredients: Eggs
+- Meal: Roast Beef
+    - Ingredients: Beef sirloin
+- Meal: Pizza
+    - Ingredients: Pizza dough
+
+
+### Category: Sides
+- Meal: Baked Potatoes
+    - Ingredients: Potatoes
+
+
+### Category: Appetizers
+- Meal: Gratinated Scallops
+    - Ingredients: Scallops
+- Meal: Savory Croissants
+    - Ingredients: Puff Pastry
+- Meal: Shrimp Cocktail
+    - Ingredients: Shrimp
+- Meal: Veal Tonnato
+    - Ingredients: Veal
+- Meal: Spring Rolls
+    - Ingredients: Spring Roll Wrappers
+- Meal: Gratinated Mussels
+    - Ingredients: Mussels
+- Meal: Hummus
+    - Ingredients: Cooked Chickpeas
+
+
+### Category: Second Courses
+- Meal: Meatballs in Sauce
+    - Ingredients: Beef
+- Meal: Veal Stew with Potatoes
+    - Ingredients: Veal
+- Meal: Green Pepper Fillet
+    - Ingredients: Beef Fillet
+- Meal: Beef Stew
+    - Ingredients: Beef
+- Meal: Lemon Chicken
+    - Ingredients: Chicken Breast
+- Meal: Osso Buco Milanese
+    - Ingredients: Veal Shanks
+- Meal: Filetto in crosta
+    - Ingredients: Beef fillet
+- Meal: Salmone croccante
+    - Ingredients: Salmon fillet
+- Meal: Orata al forno
+    - Ingredients: Sea bream
+- Meal: Pollo alle mandorle
+    - Ingredients: Chicken breast
+- Meal: Calamari ripieni
+    - Ingredients: Squid
+- Meal: Pollo alla cacciatora
+    - Ingredients: Chicken
+- Meal: Saltimbocca alla Romana
+    - Ingredients: Veal slices
+- Meal: Chili con carne
+    - Ingredients: Beef
+- Meal: Baked chicken thighs
+    - Ingredients: Chicken thighs
+- Meal: Oven-baked salmon
+    - Ingredients: Salmon steaks
+- Meal: Oven-roasted veal roast with potatoes
+    - Ingredients: Veal flank
+- Meal: Oven-baked meatloaf
+    - Ingredients: Beef
+- Meal: Mushroom scaloppine
+    - Ingredients: Veal
+- Meal: Oven-baked prawns
+    - Ingredients: Prawns
+- Meal: Fish meatballs
+    - Ingredients: Cod
+
+
+### Category: First Courses
+- Meal: Pumpkin Cream
+    - Ingredients: Pumpkin
+- Meal: Calamarata
+    - Ingredients: Calamarata Pasta
+- Meal: Cannelloni
+    - Ingredients: Flour
+- Meal: Spaghetti with Seafood
+    - Ingredients: Spaghetti
+- Meal: Potato Gnocchi
+    - Ingredients: Red Potatoes
+- Meal: Sorrento Gnocchi
+    - Ingredients: Red Potatoes
+- Meal: Steamed Chinese Ravioli
+    - Ingredients: Flour
+- Meal: Pumpkin Velouté
+    - Ingredients: Vegetable Broth
+- Meal: Gratin Onion Soup
+    - Ingredients: Golden Onions
+- Meal: Cantonese Rice
+    - Ingredients: Ribe Rice
+- Meal: Pasta alla Gricia
+    - Ingredients: Rigatoni
+- Meal: Baked Pasta
+    - Ingredients: Rigatoni
+- Meal: Orecchiette with Broccoli Rabe
+    - Ingredients: Broccoli Rabe
+- Meal: Spaghetti with Lobster
+    - Ingredients: Spaghetti
+- Meal: Risotto ai frutti di mare
+    - Ingredients: Carnaroli rice
+- Meal: Penne al baffo
+    - Ingredients: Whole wheat mezze penne
+- Meal: Zuppa di ceci
+    - Ingredients: Dried chickpeas
+- Meal: Lasagne con la zucca
+    - Ingredients: Egg pasta
+- Meal: Risotto alla salsiccia
+    - Ingredients: Carnaroli rice
+- Meal: Risotto alla crema di scampi
+    - Ingredients: Carnaroli rice
+- Meal: Spätzle di spinaci con speck e panna
+    - Ingredients: Spinach
+- Meal: Canederli alla tirolese (Knödel)
+    - Ingredients: Stale bread
+- Meal: Passatelli in brodo
+    - Ingredients: Eggs
+- Meal: Pasta and potatoes Neapolitan style
+    - Ingredients: Mixed pasta
+- Meal: Pasta and lentils
+    - Ingredients: Ditaloni Rigati
+- Meal: Porcini mushroom risotto
+    - Ingredients: Carnaroli rice
+- Meal: Spaghetti alla puttanesca
+    - Ingredients: Spaghetti
+- Meal: Pasta alla Norma
+    - Ingredients: Rigatoni
+- Meal: Mushroom risotto
+    - Ingredients: Carnaroli rice
+- Meal: Fish soup
+    - Ingredients: Shrimp
+- Meal: Leek, salmon and robiola bundles
+    - Ingredients: Eggs
