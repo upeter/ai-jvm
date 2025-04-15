@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+      }
+    },
+    "local-file-system-search": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/Users/urs/development/github/ai/kotlin-ai-talk/spring-mcp/target/spring-mcp-0.0.1-SNAPSHOT.jar"
+      ],
+      "env": {
+      }
+    }
+  }
+}

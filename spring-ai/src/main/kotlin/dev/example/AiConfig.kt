@@ -2,20 +2,30 @@ package dev.example
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import dev.example.utils.HttpClientConfig
 import dev.example.utils.RestClientInterceptor
+import io.micrometer.observation.ObservationRegistry
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.map
 import org.jetbrains.kotlinx.dataframe.io.read
 import org.springframework.ai.chat.client.ChatClient
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor
+import org.springframework.ai.chat.memory.ChatMemory
 import org.springframework.ai.chat.memory.InMemoryChatMemory
 import org.springframework.ai.document.Document
+import org.springframework.ai.embedding.BatchingStrategy
+import org.springframework.ai.embedding.EmbeddingModel
 import org.springframework.ai.image.ImageModel
 import org.springframework.ai.image.ImageOptions
 import org.springframework.ai.image.ImageOptionsBuilder
+import org.springframework.ai.ollama.OllamaChatModel
 import org.springframework.ai.openai.*
+import org.springframework.ai.openai.api.OpenAiApi
 import org.springframework.ai.openai.api.OpenAiAudioApi
 import org.springframework.ai.openai.api.OpenAiAudioApi.SpeechRequest.AudioResponseFormat
 import org.springframework.ai.openai.api.OpenAiAudioApi.TranscriptResponseFormat
@@ -24,6 +34,11 @@ import org.springframework.ai.retry.RetryUtils
 import org.springframework.ai.tool.ToolCallback
 import org.springframework.ai.tool.function.FunctionToolCallback
 import org.springframework.ai.vectorstore.VectorStore
+import org.springframework.ai.vectorstore.observation.VectorStoreObservationConvention
+import org.springframework.ai.vectorstore.pgvector.PgVectorStore
+import org.springframework.ai.vectorstore.pgvector.autoconfigure.PgVectorStoreProperties
+import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -41,19 +56,37 @@ import org.springframework.web.client.RestClient
 @Configuration
 class AiConfig {
     @Bean
-    fun chatClient(builder: ChatClient.Builder): ChatClient {
-        return builder.build()
+    fun remoteChatClient(
+        openAiChatModel: OpenAiChatModel, chatMemory: ChatMemory,
+    ): ChatClient {
+        return ChatClient.builder(openAiChatModel)
+            .defaultAdvisors(
+                SimpleLoggerAdvisor(),
+                MessageChatMemoryAdvisor(chatMemory)
+            )
+            .build()
+    }
+
+    @Bean
+    fun localChatClient(ollamaChatModel: OllamaChatModel): ChatClient {
+        return ChatClient.builder(ollamaChatModel).build()
     }
 
 
     @Bean
     @Primary
-    fun objectMapper(): ObjectMapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    fun objectMapper(): ObjectMapper =
+        jacksonObjectMapper()
+
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 
     @Bean
     fun openAiAudioApi(@Value("#{environment.OPENAI_API_KEY}") key: String, restClientBuilder: RestClient.Builder) =
-        OpenAiAudioApi.Builder().baseUrl("https://api.openai.com").apiKey(key).restClientBuilder(restClientBuilder).responseErrorHandler(RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER).build()
+        OpenAiAudioApi.Builder().baseUrl("https://api.openai.com").apiKey(key).restClientBuilder(restClientBuilder)
+            .responseErrorHandler(RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER).build()
 
 
     @Bean
@@ -98,11 +131,6 @@ class AiConfig {
         return OpenAiImageModel(OpenAiImageApi.Builder().apiKey(apiKey).build())
     }
 
-
-
-
-
-
     @Bean
     fun restClientCustomizer(): RestClientCustomizer {
         val clientConfig: HttpClientConfig = HttpClientConfig.builder().logRequests(true).logResponses(true).build()
@@ -129,6 +157,12 @@ class AiConfig {
     @Bean
     fun chatMemory() = InMemoryChatMemory()
 
+    @Bean
+    @Primary
+    fun embeddingModel( @Qualifier("openAiEmbeddingModel") embeddingModel: EmbeddingModel): EmbeddingModel {
+        return embeddingModel
+    }
+
 
     /**
      * https://dev.to/mcadariu/springai-llama3-and-pgvector-bragging-rights-2n8o
@@ -151,7 +185,8 @@ class AiConfig {
                         val content = """${it["Name"]} ${it["Category"]} ${
                             mapper.readValue<List<List<String>>>(ingredients).map { it[0] }
                         }"""
-                        Document(content,
+                        Document(
+                            content,
                             mapOf(
                                 "Name" to it["Name"].toString(),
                                 "Category" to it["Category"].toString(),
@@ -168,8 +203,6 @@ class AiConfig {
     }
 
 
-
-
     @Bean
     fun orderService(): ToolCallback {
         return FunctionToolCallback.builder("orderService", OrderService())
@@ -180,42 +213,46 @@ class AiConfig {
 
     @Bean
     fun menuService(vectorStore: VectorStore): ToolCallback {
-        return FunctionToolCallback.builder("menuService",  MenuService(vectorStore))
+        return FunctionToolCallback.builder("menuService", MenuService(vectorStore))
             .inputType(MenuRequest::class.java)
             .description("Find matching dishes based on dish name or ingredients")
             .build()
     }
 }
 
-data class OrderRequest(val meals:List<String>)
+data class OrderRequest(val meals: List<String>)
 
-data class OrderResponse(val deliveredInMinutes:Int)
+data class OrderResponse(val deliveredInMinutes: Int)
 
-class OrderService():java.util.function.Function<OrderRequest, OrderResponse> {
+class OrderService() : java.util.function.Function<OrderRequest, OrderResponse> {
 
     override fun apply(orderRequest: OrderRequest): OrderResponse {
         logger.info(
-                "\n*****************************************************************************\n" +
-                "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
-                "*****************************************************************************\n\n")
+            "\n*****************************************************************************\n" +
+                    "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
+                    "*****************************************************************************\n\n"
+        )
         return OrderResponse(20)
     }
 
 }
 
 
-data class MenuRequest(val dish:String)
+data class MenuRequest(val dish: String)
 
-data class MenuResponse(val menus:List<String>)
+data class MenuResponse(val menus: List<String>)
 
-class MenuService(val vectorStore: VectorStore):java.util.function.Function<MenuRequest, MenuResponse> {
+class MenuService(val vectorStore: VectorStore) : java.util.function.Function<MenuRequest, MenuResponse> {
 
-    override fun apply(dish:MenuRequest): MenuResponse {
+    override fun apply(dish: MenuRequest): MenuResponse {
         logger.info(
             "\n-------------------------------------------------------------\n" +
                     "🧑‍🍳Calling menu service 🧑‍🍳\n" +
-                    "-------------------------------------------------------------\n\n")
-        return MenuResponse(vectorStore.similaritySearch(dish.dish).orEmpty().mapNotNull { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.text}" })
+                    "-------------------------------------------------------------\n\n"
+        )
+        return MenuResponse(
+            vectorStore.similaritySearch(dish.dish).orEmpty()
+                .mapNotNull { "Dish: ${it.metadata["Name"]} Dish with Ingredients: ${it.text}" })
     }
 
 }
