@@ -1,8 +1,5 @@
 package dev.example
 
-import org.apache.logging.log4j.message.Message
-import org.springframework.ai.chat.prompt.PromptTemplate
-import org.springframework.ai.document.Document
 import org.springframework.ai.tool.ToolCallback
 import org.springframework.ai.tool.ToolCallbacks
 import org.springframework.ai.tool.annotation.Tool
@@ -13,7 +10,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 
 
-import reactor.core.publisher.Mono
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.requiredBody
