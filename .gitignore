@@ -41,3 +41,4 @@ shell.log
 /spring-ai/src/test/resources/sample.mp3
 /langchain4j/src/main/resources/food/archive (2).zip
 /langchain4j/src/main/resources/food/gz_recipe.csv
+**/.gradle/
