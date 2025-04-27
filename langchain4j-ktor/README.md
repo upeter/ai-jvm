@@ -18,7 +18,7 @@ The server is configured using the `application.conf` file in the `src/main/reso
   - Temperature: 0.0
   - Timeout: 60 seconds
   - Logging: Requests and responses are logged
-
+``
 ## Running the Server
 
 To run the server, use the following command:

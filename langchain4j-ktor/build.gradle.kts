@@ -6,14 +6,11 @@ version = "1.0"
 description = "AI try outs with Ktor"
 
 object Versions {
-    const val kotlin_version = "2.0.0"
-    const val kotlinx_version = "1.7.3"
-    const val ktor_version = "2.3.9"
+    const val kotlin_version = "2.1.20"
+    const val kotlinx_version = "1.10.2"
+    const val ktor_version = "3.1.2"
     const val jackson_version = "2.14.2"
-    const val arrow_version = "1.2.4"
     const val langchain4j = "0.36.2"
-    const val pgvector = "0.1.3"
-    const val postgresql = "42.6.0"
     const val logback_version = "1.4.14"
 }
 
@@ -22,9 +19,8 @@ repositories {
 }
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "2.0.0"
-    id("io.ktor.plugin") version "2.3.9"
-    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    id("org.jetbrains.kotlin.jvm") version "2.1.20"
+    id("io.ktor.plugin") version "3.1.2"
     application
 }
 
@@ -34,8 +30,6 @@ application {
 }
 
 dependencies {
-    ksp("io.arrow-kt:arrow-optics-ksp-plugin:${Versions.arrow_version}")
-
     implementation("io.ktor:ktor-server-core:${Versions.ktor_version}")
     implementation("io.ktor:ktor-server-netty:${Versions.ktor_version}")
     implementation("io.ktor:ktor-server-content-negotiation:${Versions.ktor_version}")
@@ -50,6 +44,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinx_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.kotlinx_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${Versions.kotlinx_version}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${Versions.kotlinx_version}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${Versions.kotlinx_version}")
+    implementation("io.projectreactor:reactor-core:3.6.4")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${Versions.jackson_version}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jackson_version}")
@@ -62,11 +59,12 @@ dependencies {
     implementation("dev.langchain4j:langchain4j:${Versions.langchain4j}")
     implementation("dev.langchain4j:langchain4j-open-ai:${Versions.langchain4j}")
     implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-pgvector:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:${Versions.langchain4j}")
-    implementation("com.pgvector:pgvector:${Versions.pgvector}")
-    implementation("org.postgresql:postgresql:${Versions.postgresql}")
+    // These dependencies are not needed for the basic functionality
+    // implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j}")
+    // implementation("dev.langchain4j:langchain4j-pgvector:${Versions.langchain4j}")
+    // implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:${Versions.langchain4j}")
+//    implementation("com.pgvector:pgvector:${Versions.pgvector}")
+//    implementation("org.postgresql:postgresql:${Versions.postgresql}")
 
     testImplementation("io.ktor:ktor-server-test-host:${Versions.ktor_version}")
     testImplementation("org.jetbrains.kotlin:kotlin-test:${Versions.kotlin_version}")
@@ -92,10 +90,5 @@ tasks.test {
 }
 
 kotlin {
-    sourceSets.main {
-        kotlin.srcDir("build/generated/ksp/main/kotlin")
-    }
-    sourceSets.test {
-        kotlin.srcDir("build/generated/ksp/test/kotlin")
-    }
+    // No special configuration needed
 }
