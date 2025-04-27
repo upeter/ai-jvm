@@ -44,11 +44,12 @@ data class ChatInput(
 fun App() {
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    
+
     var inputText by remember { mutableStateOf("") }
     var messages by remember { mutableStateOf(listOf<ChatMessage>()) }
     var conversationId by remember { mutableStateOf(UUID.randomUUID().toString()) }
-    
+    var isLoading by remember { mutableStateOf(false) }
+
     val httpClient = remember {
         HttpClient(CIO) {
             install(ContentNegotiation) {
@@ -56,12 +57,19 @@ fun App() {
             }
         }
     }
-    
+
     MaterialTheme {
         Box(
             modifier = Modifier.fillMaxSize().padding(16.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+                // Progress bar
+                if (isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    )
+                }
+
                 // Chat messages area
                 LazyColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -72,7 +80,7 @@ fun App() {
                         ChatBubble(message)
                     }
                 }
-                
+
                 // Input area
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -85,40 +93,43 @@ fun App() {
                         placeholder = { Text("Type a message...") },
                         maxLines = 3
                     )
-                    
+
                     Spacer(modifier = Modifier.width(8.dp))
-                    
+
                     Button(
                         onClick = {
-                            if (inputText.isNotBlank()) {
+                            if (inputText.isNotBlank() && !isLoading) {
                                 val userMessage = ChatMessage(inputText, true)
                                 messages = messages + userMessage
-                                
+                                isLoading = true
+
                                 scope.launch {
                                     try {
                                         val response = httpClient.post("http://localhost:8080/ai/chat") {
                                             contentType(ContentType.Application.Json)
                                             setBody(ChatInput(inputText, conversationId))
                                         }
-                                        
+
                                         val responseText = response.body<String>()
                                         messages = messages + ChatMessage(responseText, false)
-                                        
+
                                         // Scroll to the bottom
                                         listState.animateScrollToItem(messages.size - 1)
                                     } catch (e: Exception) {
                                         messages = messages + ChatMessage("Error: ${e.message}", false)
+                                    } finally {
+                                        isLoading = false
+                                        inputText = ""
                                     }
-                                    
-                                    inputText = ""
                                 }
                             }
-                        }
+                        },
+                        enabled = !isLoading && inputText.isNotBlank()
                     ) {
                         Text("Send")
                     }
                 }
-                
+
                 // Clear conversation button
                 Button(
                     onClick = {
