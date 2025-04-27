@@ -1,6 +1,7 @@
 package dev.example
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -175,16 +177,30 @@ fun ChatBubbleWithStyle(content: String, style: ChatBubbleStyle) {
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = style.alignment
     ) {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = style.backgroundColor,
-            modifier = Modifier.widthIn(max = 300.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (style is ChatBubbleStyle.Agent) Arrangement.Start else Arrangement.End
         ) {
-            Text(
-                text = content,
-                modifier = Modifier.padding(12.dp),
-                color = style.textColor
-            )
+            // Show agent icon only for agent messages
+            if (style is ChatBubbleStyle.Agent) {
+                Image(
+                    painter = painterResource("AgentIcon.png"),
+                    contentDescription = "Agent",
+                    modifier = Modifier.size(40.dp).padding(end = 8.dp)
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = style.backgroundColor,
+                modifier = Modifier.widthIn(max = 300.dp)
+            ) {
+                Text(
+                    text = content,
+                    modifier = Modifier.padding(12.dp),
+                    color = style.textColor
+                )
+            }
         }
     }
 }
