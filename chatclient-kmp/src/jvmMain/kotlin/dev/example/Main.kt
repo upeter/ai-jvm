@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,6 +53,7 @@ fun App() {
     var messages by remember { mutableStateOf(listOf<ChatMessage>()) }
     var conversationId by remember { mutableStateOf(UUID.randomUUID().toString()) }
     var isLoading by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     val httpClient = remember {
         HttpClient(CIO) {
@@ -65,6 +68,35 @@ fun App() {
             modifier = Modifier.fillMaxSize().padding(16.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+                // Hamburger menu
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Clear Conversation") },
+                                onClick = {
+                                    conversationId = UUID.randomUUID().toString()
+                                    messages = listOf()
+                                    menuExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 // Progress bar
                 if (isLoading) {
                     LinearProgressIndicator(
@@ -130,17 +162,6 @@ fun App() {
                     ) {
                         Text("Send")
                     }
-                }
-
-                // Clear conversation button
-                Button(
-                    onClick = {
-                        conversationId = UUID.randomUUID().toString()
-                        messages = listOf()
-                    },
-                    modifier = Modifier.align(Alignment.End).padding(top = 8.dp)
-                ) {
-                    Text("Clear Conversation")
                 }
             }
         }
