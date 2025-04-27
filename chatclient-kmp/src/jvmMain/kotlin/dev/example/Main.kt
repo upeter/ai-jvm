@@ -14,7 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -120,10 +124,65 @@ fun App() {
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Create focus requesters for input field and send button
+                    val inputFieldFocus = remember { FocusRequester() }
+                    val sendButtonFocus = remember { FocusRequester() }
+
+                    // Function to send message
+                    val sendMessage = {
+                        if (inputText.isNotBlank() && !isLoading) {
+                            val userMessage = ChatMessage(inputText, true)
+                            messages = messages + userMessage
+                            isLoading = true
+
+                            scope.launch {
+                                try {
+                                    val response = httpClient.post("http://localhost:8080/ai/chat") {
+                                        contentType(ContentType.Application.Json)
+                                        setBody(ChatInput(inputText, conversationId))
+                                    }
+
+                                    val responseText = response.body<String>()
+                                    messages = messages + ChatMessage(responseText, false)
+
+                                    // Scroll to the bottom
+                                    listState.animateScrollToItem(messages.size - 1)
+                                } catch (e: Exception) {
+                                    messages = messages + ChatMessage("Error: ${e.message}", false)
+                                } finally {
+                                    isLoading = false
+                                    inputText = ""
+                                    // Return focus to input field after sending
+                                    inputFieldFocus.requestFocus()
+                                }
+                            }
+                        }
+                    }
+
                     OutlinedTextField(
                         value = inputText,
                         onValueChange = { inputText = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(inputFieldFocus)
+                            .focusProperties {
+                                next = sendButtonFocus
+                            }
+                            .onKeyEvent { event ->
+                                    when (event.key) {
+                                        Key.Tab -> {
+                                            // Move focus to send button when Tab is pressed
+                                            sendButtonFocus.requestFocus()
+                                            true // Consume the event to prevent default behavior
+                                        }
+//                                        Key.Enter -> {
+//                                            // Send message when Enter is pressed
+//                                            sendMessage()
+//                                            true // Consume the event
+//                                        }
+                                        else -> false // Don't consume other key events
+                                    }
+                            },
                         placeholder = { Text("Type a message...") },
                         maxLines = 3
                     )
@@ -131,33 +190,12 @@ fun App() {
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Button(
-                        onClick = {
-                            if (inputText.isNotBlank() && !isLoading) {
-                                val userMessage = ChatMessage(inputText, true)
-                                messages = messages + userMessage
-                                isLoading = true
-
-                                scope.launch {
-                                    try {
-                                        val response = httpClient.post("http://localhost:8080/ai/chat") {
-                                            contentType(ContentType.Application.Json)
-                                            setBody(ChatInput(inputText, conversationId))
-                                        }
-
-                                        val responseText = response.body<String>()
-                                        messages = messages + ChatMessage(responseText, false)
-
-                                        // Scroll to the bottom
-                                        listState.animateScrollToItem(messages.size - 1)
-                                    } catch (e: Exception) {
-                                        messages = messages + ChatMessage("Error: ${e.message}", false)
-                                    } finally {
-                                        isLoading = false
-                                        inputText = ""
-                                    }
-                                }
-                            }
-                        },
+                        onClick = { sendMessage() },
+                        modifier = Modifier
+                            .focusRequester(sendButtonFocus)
+                            .focusProperties {
+                                previous = inputFieldFocus
+                            },
                         enabled = !isLoading && inputText.isNotBlank()
                     ) {
                         Text("Send")
