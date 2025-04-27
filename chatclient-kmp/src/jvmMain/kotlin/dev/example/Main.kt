@@ -145,21 +145,45 @@ fun App() {
     }
 }
 
+sealed class ChatBubbleStyle {
+    abstract val alignment: Alignment
+    abstract val backgroundColor: Color
+    abstract val textColor: Color
+
+    object User : ChatBubbleStyle() {
+        override val alignment = Alignment.CenterEnd
+        override val backgroundColor = Color(0xFF2196F3)
+        override val textColor = Color.White
+    }
+
+    object Agent : ChatBubbleStyle() {
+        override val alignment = Alignment.CenterStart
+        override val backgroundColor = Color(0xFFE0E0E0)
+        override val textColor = Color.Black
+    }
+}
+
 @Composable
 fun ChatBubble(message: ChatMessage) {
+    val style = if (message.isUserMessage) ChatBubbleStyle.User else ChatBubbleStyle.Agent
+    ChatBubbleWithStyle(message.content, style)
+}
+
+@Composable
+fun ChatBubbleWithStyle(content: String, style: ChatBubbleStyle) {
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = if (message.isUserMessage) Alignment.CenterEnd else Alignment.CenterStart
+        contentAlignment = style.alignment
     ) {
         Surface(
             shape = RoundedCornerShape(8.dp),
-            color = if (message.isUserMessage) Color(0xFF2196F3) else Color(0xFFE0E0E0),
+            color = style.backgroundColor,
             modifier = Modifier.widthIn(max = 300.dp)
         ) {
             Text(
-                text = message.content,
+                text = content,
                 modifier = Modifier.padding(12.dp),
-                color = if (message.isUserMessage) Color.White else Color.Black
+                color = style.textColor
             )
         }
     }
