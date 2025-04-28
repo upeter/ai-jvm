@@ -69,7 +69,7 @@ fun App() {
 
     MaterialTheme {
         Box(
-            modifier = Modifier.fillMaxSize().padding(16.dp)
+            modifier = Modifier.fillMaxSize().padding(16.dp).background(Color.White)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Hamburger menu
@@ -213,14 +213,14 @@ sealed class ChatBubbleStyle {
 
     object User : ChatBubbleStyle() {
         override val alignment = Alignment.CenterEnd
-        override val backgroundColor = Color(0xFF2196F3)
+        override val backgroundColor = Color(0xFF009246) // Italian green
         override val textColor = Color.White
     }
 
     object Agent : ChatBubbleStyle() {
         override val alignment = Alignment.CenterStart
-        override val backgroundColor = Color(0xFFE0E0E0)
-        override val textColor = Color.Black
+        override val backgroundColor = Color(0xFFCE2B37) // Italian red
+        override val textColor = Color.White
     }
 }
 
@@ -245,14 +245,14 @@ fun ChatBubbleWithStyle(content: String, style: ChatBubbleStyle) {
                 Image(
                     painter = painterResource("AgentIcon.png"),
                     contentDescription = "Agent",
-                    modifier = Modifier.size(40.dp).padding(end = 8.dp)
+                    modifier = Modifier.size(55.dp).padding(end = 8.dp)
                 )
             }
 
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = style.backgroundColor,
-                modifier = Modifier.widthIn(max = 300.dp)
+                modifier = Modifier.widthIn(max = 400.dp)
             ) {
                 Text(
                     text = content,
