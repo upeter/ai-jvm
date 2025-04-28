@@ -233,11 +233,11 @@ fun ChatBubble(message: ChatMessage) {
 @Composable
 fun ChatBubbleWithStyle(content: String, style: ChatBubbleStyle) {
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp),
         contentAlignment = style.alignment
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = if (style is ChatBubbleStyle.Agent) Arrangement.Start else Arrangement.End
         ) {
             // Show agent icon only for agent messages
@@ -245,7 +245,8 @@ fun ChatBubbleWithStyle(content: String, style: ChatBubbleStyle) {
                 Image(
                     painter = painterResource("AgentIcon.png"),
                     contentDescription = "Agent",
-                    modifier = Modifier.size(55.dp).padding(end = 8.dp)
+                    modifier = Modifier.size(60.dp).padding(end = 8.dp),
+                    alignment = Alignment.TopStart
                 )
             }
 
