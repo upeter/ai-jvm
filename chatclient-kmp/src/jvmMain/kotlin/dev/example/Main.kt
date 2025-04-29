@@ -35,6 +35,7 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.launch
 import java.util.*
+import dev.example.AudioChatScreen
 
 data class ChatMessage(
     val content: String,
@@ -47,6 +48,12 @@ data class ChatInput(
     val conversationId: String = UUID.randomUUID().toString()
 )
 
+// Enum to represent different screens in the app
+enum class Screen {
+    TEXT_CHAT,
+    AUDIO_CHAT
+}
+
 @Composable
 @Preview
 fun App() {
@@ -58,6 +65,7 @@ fun App() {
     var conversationId by remember { mutableStateOf(UUID.randomUUID().toString()) }
     var isLoading by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
+    var currentScreen by remember { mutableStateOf(Screen.TEXT_CHAT) }
 
     val httpClient = remember {
         HttpClient(CIO) {
@@ -90,6 +98,21 @@ fun App() {
                             onDismissRequest = { menuExpanded = false }
                         ) {
                             DropdownMenuItem(
+                                text = { Text("Text Chat") },
+                                onClick = {
+                                    currentScreen = Screen.TEXT_CHAT
+                                    menuExpanded = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Audio Chat") },
+                                onClick = {
+                                    currentScreen = Screen.AUDIO_CHAT
+                                    menuExpanded = false
+                                }
+                            )
+                            Divider()
+                            DropdownMenuItem(
                                 text = { Text("Clear Conversation") },
                                 onClick = {
                                     conversationId = UUID.randomUUID().toString()
@@ -101,104 +124,114 @@ fun App() {
                     }
                 }
 
-                // Progress bar
-                if (isLoading) {
-                    LinearProgressIndicator(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
-                    )
-                }
+                // Screen content based on current screen
+                when (currentScreen) {
+                    Screen.TEXT_CHAT -> {
+                        // Progress bar
+                        if (isLoading) {
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                            )
+                        }
 
-                // Chat messages area
-                LazyColumn(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    state = listState,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(messages) { message ->
-                        ChatBubble(message)
-                    }
-                }
+                        // Chat messages area
+                        LazyColumn(
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            state = listState,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(messages) { message ->
+                                ChatBubble(message)
+                            }
+                        }
 
-                // Input area
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Create focus requesters for input field and send button
-                    val inputFieldFocus = remember { FocusRequester() }
-                    val sendButtonFocus = remember { FocusRequester() }
+                        // Input area
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Create focus requesters for input field and send button
+                            val inputFieldFocus = remember { FocusRequester() }
+                            val sendButtonFocus = remember { FocusRequester() }
 
-                    // Function to send message
-                    val sendMessage = {
-                        if (inputText.isNotBlank() && !isLoading) {
-                            val userMessage = ChatMessage(inputText, true)
-                            messages = messages + userMessage
-                            isLoading = true
+                            // Function to send message
+                            val sendMessage = {
+                                if (inputText.isNotBlank() && !isLoading) {
+                                    val userMessage = ChatMessage(inputText, true)
+                                    messages = messages + userMessage
+                                    isLoading = true
 
-                            scope.launch {
-                                try {
-                                    val response = httpClient.post("http://localhost:8080/ai/chat") {
-                                        contentType(ContentType.Application.Json)
-                                        setBody(ChatInput(inputText, conversationId))
+                                    scope.launch {
+                                        try {
+                                            val response = httpClient.post("http://localhost:8080/ai/chat") {
+                                                contentType(ContentType.Application.Json)
+                                                setBody(ChatInput(inputText, conversationId))
+                                            }
+
+                                            val responseText = response.body<String>()
+                                            messages = messages + ChatMessage(responseText, false)
+
+                                            // Scroll to the bottom
+                                            listState.animateScrollToItem(messages.size - 1)
+                                        } catch (e: Exception) {
+                                            messages = messages + ChatMessage("Error: ${e.message}", false)
+                                        } finally {
+                                            isLoading = false
+                                            inputText = ""
+                                            // Return focus to input field after sending
+                                            inputFieldFocus.requestFocus()
+                                        }
                                     }
-
-                                    val responseText = response.body<String>()
-                                    messages = messages + ChatMessage(responseText, false)
-
-                                    // Scroll to the bottom
-                                    listState.animateScrollToItem(messages.size - 1)
-                                } catch (e: Exception) {
-                                    messages = messages + ChatMessage("Error: ${e.message}", false)
-                                } finally {
-                                    isLoading = false
-                                    inputText = ""
-                                    // Return focus to input field after sending
-                                    inputFieldFocus.requestFocus()
                                 }
+                            }
+
+                            OutlinedTextField(
+                                value = inputText,
+                                onValueChange = { inputText = it },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(inputFieldFocus)
+                                    .focusProperties {
+                                        next = sendButtonFocus
+                                    }
+                                    .onKeyEvent { event ->
+                                            when (event.key) {
+                                                Key.Tab -> {
+                                                    // Move focus to send button when Tab is pressed
+                                                    sendButtonFocus.requestFocus()
+                                                    true // Consume the event to prevent default behavior
+                                                }
+        //                                        Key.Enter -> {
+        //                                            // Send message when Enter is pressed
+        //                                            sendMessage()
+        //                                            true // Consume the event
+        //                                        }
+                                                else -> false // Don't consume other key events
+                                            }
+                                    },
+                                placeholder = { Text("Type a message...") },
+                                maxLines = 3
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Button(
+                                onClick = { sendMessage() },
+                                modifier = Modifier
+                                    .focusRequester(sendButtonFocus)
+                                    .focusProperties {
+                                        previous = inputFieldFocus
+                                    },
+                                enabled = !isLoading && inputText.isNotBlank()
+                            ) {
+                                Text("Send")
                             }
                         }
                     }
 
-                    OutlinedTextField(
-                        value = inputText,
-                        onValueChange = { inputText = it },
-                        modifier = Modifier
-                            .weight(1f)
-                            .focusRequester(inputFieldFocus)
-                            .focusProperties {
-                                next = sendButtonFocus
-                            }
-                            .onKeyEvent { event ->
-                                    when (event.key) {
-                                        Key.Tab -> {
-                                            // Move focus to send button when Tab is pressed
-                                            sendButtonFocus.requestFocus()
-                                            true // Consume the event to prevent default behavior
-                                        }
-//                                        Key.Enter -> {
-//                                            // Send message when Enter is pressed
-//                                            sendMessage()
-//                                            true // Consume the event
-//                                        }
-                                        else -> false // Don't consume other key events
-                                    }
-                            },
-                        placeholder = { Text("Type a message...") },
-                        maxLines = 3
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(
-                        onClick = { sendMessage() },
-                        modifier = Modifier
-                            .focusRequester(sendButtonFocus)
-                            .focusProperties {
-                                previous = inputFieldFocus
-                            },
-                        enabled = !isLoading && inputText.isNotBlank()
-                    ) {
-                        Text("Send")
+                    Screen.AUDIO_CHAT -> {
+                        // Display the audio chat screen
+                        AudioChatScreen(httpClient)
                     }
                 }
             }

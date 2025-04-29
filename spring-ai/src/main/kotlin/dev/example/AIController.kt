@@ -12,10 +12,15 @@ import org.springframework.ai.converter.StructuredOutputConverter
 import org.springframework.ai.document.Document
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider
 import org.springframework.ai.openai.OpenAiAudioSpeechModel
+import org.springframework.ai.openai.OpenAiAudioTranscriptionModel
+import org.springframework.ai.openai.audio.speech.SpeechPrompt
+import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.core.io.InputStreamResource
 import org.springframework.util.MimeTypeUtils
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import reactor.core.publisher.Flux
 import java.net.URL
 import java.util.*
@@ -24,6 +29,7 @@ import java.util.*
 internal class AIController(
     val vectorStore: VectorStore,
     val openAiAudioSpeechModel: OpenAiAudioSpeechModel,
+    val openAiAudioTranscriptionModel: OpenAiAudioTranscriptionModel,
     val mcpSyncClients: List<McpSyncClient>,
     val remoteChatClient: ChatClient,
     val localChatClient: ChatClient
@@ -79,6 +85,23 @@ internal class AIController(
     fun speech(@RequestBody chatInput: ChatInput): ByteArray {
         val text = chat(chatInput)
         return openAiAudioSpeechModel.call(text)
+    }
+
+    @PostMapping("/ai/audio-chat", consumes = ["multipart/form-data"], produces = ["application/octet-stream"])
+    fun audioChat(@RequestParam("audio") audioFile: MultipartFile, @RequestParam("conversationId", required = false) conversationId: String? = null): ByteArray {
+        // 1. Transcribe audio to text
+        val transcriptionPrompt = AudioTranscriptionPrompt(InputStreamResource(audioFile.inputStream))
+        val transcriptionResponse = openAiAudioTranscriptionModel.call(transcriptionPrompt)
+        val transcribedText = transcriptionResponse.result.output
+
+        // 2. Call the chat method with the transcribed text
+        val chatInput = ChatInput(transcribedText, conversationId ?: UUID.randomUUID().toString())
+        val chatResponse = chat(chatInput)
+
+        // 3. Convert the response to audio
+        val speechPrompt = SpeechPrompt(chatResponse ?: "I couldn't understand that. Please try again.")
+        val speechResponse = openAiAudioSpeechModel.call(speechPrompt)
+        return speechResponse.result.output
     }
 
 
@@ -188,4 +211,3 @@ data class ChatInput(val message: String, val conversationId: String = UUID.rand
 data class Dishes(val dishes:List<Dish>)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Dish (val dish: String, val ingredients: List<String>)
-
