@@ -36,6 +36,7 @@ import java.io.FileOutputStream
 import java.util.*
 import javax.sound.sampled.*
 import javazoom.jl.player.Player
+import kotlin.io.readBytes
 
 /**
  * Audio recorder class that handles recording audio using Java Sound API
@@ -299,14 +300,25 @@ fun AudioChatScreen(httpClient: HttpClient) {
                                         val response = httpClient.submitFormWithBinaryData(
                                             url = "http://localhost:8080/ai/audio-chat",
                                             formData = formData {
+                                                // Add the audio file part with explicit headers
                                                 append("audio", tempFile.readBytes(), Headers.build {
-                                                    append(HttpHeaders.ContentType, "audio/mp3")
-                                                    append(HttpHeaders.ContentDisposition, "filename=audio.mp3")
+                                                    append(HttpHeaders.ContentType, "audio/mpeg")
+                                                    append(HttpHeaders.ContentDisposition, "filename=\"${tempFile.name}\"")
                                                 })
-                                                append("conversationId", conversationId)
-                                            },
 
-                                        )
+
+                                                // Add the conversation ID part
+                                                append("conversationId", conversationId)
+                                            }
+                                        ) {
+                                            // Set the Accept header to application/octet-stream
+                                            header(HttpHeaders.Accept, ContentType.Application.OctetStream.toString())
+                                        }
+
+                                        // Check response status
+                                        if (response.status.value != 200) {
+                                            throw Exception("Server returned error: ${response.status.value} ${response.status.description}")
+                                        }
 
                                         // Get response audio
                                         val responseAudio = response.body<ByteArray>()
