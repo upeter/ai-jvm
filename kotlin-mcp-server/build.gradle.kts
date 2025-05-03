@@ -1,14 +1,17 @@
 plugins {
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.serialization") version "2.1.0"
+    id("com.github.onslip.gradle-one-jar") version "1.1.0"
     application
 }
 
 
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("MCPServicesKt")
 }
+
+
 
 
 group = "org.example"
@@ -32,6 +35,20 @@ testImplementation(kotlin("test"))
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "MCPServicesKt"
+    }
+    archiveBaseName = "mcp-kt-jar"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    })
+}
+
+
+
 kotlin {
     jvmToolchain(21)
 }

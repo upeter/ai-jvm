@@ -3,12 +3,12 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.accept
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
 import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.GetPromptResult
 import io.modelcontextprotocol.kotlin.sdk.Implementation
@@ -23,9 +23,16 @@ import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.putJsonObject
+import io.ktor.utils.io.streams.*
+import io.modelcontextprotocol.kotlin.sdk.*
+import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.runBlocking
+import kotlinx.io.asSink
+import kotlinx.io.buffered
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.io.asSource
+import kotlinx.serialization.json.*
 
 class MCPServices {}
 fun configureMCPServer(): Server {
@@ -37,7 +44,7 @@ fun configureMCPServer(): Server {
         ServerOptions(
             capabilities = ServerCapabilities(
                 prompts = ServerCapabilities.Prompts(listChanged = true),
-                resources = ServerCapabilities.Resources(subscribe = true, listChanged = true),
+                resources = ServerCapabilities.Resources(subscribe = true, listChanged = false),
                 tools = ServerCapabilities.Tools(listChanged = true),
             )
         )
@@ -64,24 +71,64 @@ fun configureMCPServer(): Server {
         }
     }
 
+    suspend fun orderDish(order: OrderRequest): OrderResponse {
+        val response: HttpResponse = httpClient.post("$baseUrl/ai/order-dish") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(order)
+        }
+        return response.body()
+    }
+
+
+
+    suspend fun selectDishes(foodElements:List<String>): List<String> {
+        val response: HttpResponse = httpClient.get("$baseUrl/ai/dish-selection?foodElements=${foodElements.joinToString(",")}") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+        }
+        return response.body()
+    }
+
+
     server.addPrompt(
-        name = "classify-prompt-if-food-or-other",
-        description = "Classifies a prompt to verify whether it is food or something else. If classified as food, extracted food items are returned.",
-        arguments = listOf(
-            PromptArgument(
-                name = "Prompt",
-                description = "The user prompt",
-                required = true
-            )
-        )
+        name = "italian-meal-agent",
+        description = "suggests dishes and handles orders using a conversational waiter AI of the Italian DelAIght restaurant",
+        arguments = emptyList()
     ) { request ->
-        GetPromptResult(description = null,
+        GetPromptResult(
+            description = null,
             messages = listOf(
                 PromptMessage(
                     role = Role.user,
-                    content = TextContent("""
+                    content = TextContent(ITALIAN_AGENT_PROMPT)
+                )
+            )
+        )
+    }
+
+    // Add a resource
+    server.addResource(
+        uri = "file:///italian/delaight/menu.md",
+        name = "complete-menu-italian-delaight-restaurant",
+        description = "The complete menu and dishes of the Italian DelAIght restaurant",
+        mimeType = "text/markdown"
+    ) { request ->
+        ReadResourceResult(
+            contents = listOf(
+                TextResourceContents(text = MCPServices::class.java.getResourceAsStream("/menu.md").reader().readText(), uri = "unknown", mimeType =  "text/markdown")
+            )
+        )
+    }
+
+
+    server.addTool(
+        name = "classify-prompt-if-food-or-other",
+        description = "Classifies a prompt to verify whether it is food or something else. If classified as food, extracted food items are returned.",
+    ) { request ->
+        CallToolResult(content = listOf(TextContent("""
         |Classify the following prompt as 'food' or 'other'. If it is about food, extract dish name and/or ingredients. 
-        |The prompt is=[${request.arguments?.get("Prompt")}]
+        |The prompt is=[${request.arguments}]
         |Your response should be in JSON format.
         |Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
         |Do not include markdown code blocks in your response.
@@ -104,57 +151,45 @@ fun configureMCPServer(): Server {
         |   },
         |   "additionalProperties": false
         |}```
-        |""".trimMargin()))))
+        |""".trimMargin())))
     }
 
-    // Add a tool
+
     server.addTool(
-        name = "kotlin-sdk-tool",
-        description = "A test tool",
-        inputSchema = Tool.Input()
+        name = "dish-selection-service",
+        description = """Select matching dishes for given food elements like meal or dish name and or ingredients.""".trimIndent(),
+        inputSchema = Tool.Input(
+            properties =  buildJsonObject {
+                put("foodElements", buildJsonObject {
+                    put("type", JsonPrimitive("array"))
+                    put("items", buildJsonObject {
+                        put("type", JsonPrimitive("string"))
+                    })
+                })
+            },
+            required = listOf("foodElements"),)
     ) { request ->
+        val dishSelectionRequest = request.arguments.get("foodElements")?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
+
+        val selectedDishes = selectDishes(dishSelectionRequest)
+
         CallToolResult(
-            content = listOf(TextContent("Hello, world!"))
-        )
-    }
-
-    // Add a resource
-    server.addResource(
-        uri = "file:///italian/delaight/menu.md",
-        name = "complete-menu-italian-delaight-restaurant",
-        description = "The complete menu of the Italian DelAIght restaurant",
-        mimeType = "text/markdown"
-    ) { request ->
-        ReadResourceResult(
-            contents = listOf(
-                TextResourceContents(text = MCPServices::class.java.getResourceAsStream("/menu.md").reader().readText(), uri = "unknown", mimeType =  "text/markdown")
-            )
+            content = selectedDishes.map { TextContent(it) }
         )
     }
 
 
-//    @Tool(name = "order-dish-service", description = "Dish order service")
-//    fun orderDish(@ToolParam(description = "Dishes that will be ordered") order: dev.example.OrderRequest): dev.example.OrderResponse {
-//        return restClient.post()
-//            .uri("/ai/order-dish")
-//            .contentType(MediaType.APPLICATION_JSON)
-//            .body(order)
-//            .accept(MediaType.APPLICATION_JSON)
-//            .retrieve()
-//            .requiredBody()
-//    }
     server.addTool(
         name = "order-dish-service",
         description = """Dish order service for the italian delaight restaurant.""".trimIndent(),
         inputSchema = Tool.Input(
             properties =  buildJsonObject {
-                putJsonObject("meals") {
-                    put("type", "array")
-                    put("description", "Dishes that will be ordered")
-                    putJsonObject("items") {
-                        put("type", "string")
-                    }
-                }
+                put("foodElements", buildJsonObject {
+                    put("type", JsonPrimitive("array"))
+                    put("items", buildJsonObject {
+                        put("type", JsonPrimitive("string"))
+                    })
+                })
             },
             required = listOf("meals"),)
     ) { request ->
@@ -167,19 +202,23 @@ fun configureMCPServer(): Server {
         )
     }
 
-    suspend fun orderDish(order: OrderRequest): OrderResponse {
-        val response: HttpResponse = httpClient.post("$baseUrl/ai/order-dish") {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(order)
-        }
-        return response.body()
-    }
-
 
 
     return server
 }
+
+ val ITALIAN_AGENT_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
+Here's how to behave:
+- If the user wants to have some ideas about dishes run `complete-menu-italian-delaight-restaurant` to have the complete menu.
+- If the user gives food preferences or ingredients, use the `dish-selection-service` tool to find matching dishes.
+- before looking for preferred meals first run the `classify-prompt-if-food-or-other` tool to understand whether the prompt is about a food preference or not.
+- Propose ALL matching dishes from the `dish-selection-service` result.
+- If the customer confirms a dish, call the `order-dish-service` tool.
+- Once the order is placed, thank them and summarize the dish names with the estimated delivery time.
+
+Only use the tools to gather or act on information. Do not invent dishes. Be polite, helpful, and speak in a friendly English tone.
+""".trimIndent()
+
 
 @Serializable
 data class OrderRequest(val meals: List<String>)
@@ -187,3 +226,31 @@ data class OrderRequest(val meals: List<String>)
 @Serializable
 data class OrderResponse(val deliveredInMinutes: Int)
 
+fun runMcpServerUsingStdio() {
+    // Note: The server will handle listing prompts, tools, and resources automatically.
+    // The handleListResourceTemplates will return empty as defined in the Server code.
+    val server = configureMCPServer()
+    val transport = StdioServerTransport(
+        inputStream = System.`in`.asSource().buffered(),
+        outputStream = System.out.asSink().buffered()
+    )
+
+    runBlocking {
+        server.connect(transport)
+        //println("Server connected")
+        val done = Job()
+        server.onClose {
+            done.complete()
+        }
+        done.join()
+        println("Server closed")
+    }
+}
+
+fun main(args: Array<String>) {
+    runMcpServerUsingStdio()
+}
+
+//{ "jsonrpc": "2.0", "method": "resources/read","params": {  "uri" : "file:///italian/delaight/menu.md", "resource": "complete-menu-italian-delaight-restaurant" },"id": 1 }
+//{ "jsonrpc": "2.0", "method": "resources/get","params": {  "uri" : "file:///italian/delaight/menu.md", "resource": "complete-menu-italian-delaight-restaurant" },"id": 1 }
+//

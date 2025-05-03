@@ -33,18 +33,18 @@ import kotlinx.io.buffered
  * - "--sse-server-ktor <port>": Runs an SSE MCP server using Ktor plugin (default if no argument is provided).
  * - "--sse-server <port>": Runs an SSE MCP server with a plain configuration.
  */
-fun main(args: Array<String>) {
-    val command = args.firstOrNull() ?: "--sse-server-ktor"
-    val port = args.getOrNull(1)?.toIntOrNull() ?: 3001
-    when (command) {
-        "--stdio" -> runMcpServerUsingStdio()
-        "--sse-server-ktor" -> runSseMcpServerUsingKtorPlugin(port)
-        "--sse-server" -> runSseMcpServerWithPlainConfiguration(port)
-        else -> {
-            System.err.println("Unknown command: $command")
-        }
-    }
-}
+//fun main(args: Array<String>) {
+//    val command = args.firstOrNull() ?: "--sse-server-ktor"
+//    val port = args.getOrNull(1)?.toIntOrNull() ?: 3001
+//    when (command) {
+//        "--stdio" -> runMcpServerUsingStdio2()
+//        "--sse-server-ktor" -> runSseMcpServerUsingKtorPlugin(port)
+//        "--sse-server" -> runSseMcpServerWithPlainConfiguration(port)
+//        else -> {
+//            System.err.println("Unknown command: $command")
+//        }
+//    }
+//}
 
 fun configureServer(): Server {
     val server = Server(
@@ -112,7 +112,7 @@ fun configureServer(): Server {
     return server
 }
 
-fun runMcpServerUsingStdio() {
+fun runMcpServerUsingStdio2() {
     // Note: The server will handle listing prompts, tools, and resources automatically.
     // The handleListResourceTemplates will return empty as defined in the Server code.
     val server = configureServer()
