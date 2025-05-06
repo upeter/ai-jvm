@@ -9,10 +9,10 @@
       "env": {
       }
     },
-    "jetbrains": {
-      "command": "npx",
-      "args": ["-y", "@jetbrains/mcp-proxy"]
-    },
+      "jetbrains": {
+        "command": "npx",
+        "args": ["-y", "@jetbrains/mcp-proxy"]
+      },
     "local-file-system-search": {
       "command": "java",
       "args": [

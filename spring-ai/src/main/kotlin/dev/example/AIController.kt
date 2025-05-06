@@ -116,7 +116,7 @@ internal class AIController(
 
 
 
-    @GetMapping("/ai/dish-selection")
+    @GetMapping("/ai/find-dishes")
     fun menuSelection(@RequestParam("foodElements") foodElements: List<String>): List<String> {
      return vectorStore
             .similaritySearch(foodElements.joinToString()).orEmpty().mapNotNull { it.text }

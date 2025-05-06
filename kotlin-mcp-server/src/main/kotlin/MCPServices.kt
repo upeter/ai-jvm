@@ -83,7 +83,7 @@ fun configureMCPServer(): Server {
 
 
     suspend fun selectDishes(foodElements:List<String>): List<String> {
-        val response: HttpResponse = httpClient.get("$baseUrl/ai/dish-selection?foodElements=${foodElements.joinToString(",")}") {
+        val response: HttpResponse = httpClient.get("$baseUrl/ai/find-dishes?foodElements=${foodElements.joinToString(",")}") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
         }
@@ -156,7 +156,7 @@ fun configureMCPServer(): Server {
 
 
     server.addTool(
-        name = "dish-selection-service",
+        name = "find-dishes-service",
         description = """Select matching dishes for given food elements like meal or dish name and or ingredients.""".trimIndent(),
         inputSchema = Tool.Input(
             properties =  buildJsonObject {
@@ -210,9 +210,9 @@ fun configureMCPServer(): Server {
  val ITALIAN_AGENT_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
 Here's how to behave:
 - If the user wants to have some ideas about dishes run `complete-menu-italian-delaight-restaurant` to have the complete menu.
-- If the user gives food preferences or ingredients, use the `dish-selection-service` tool to find matching dishes.
+- If the user gives food preferences or ingredients, use the `find-dishes-service` tool to find matching dishes.
 - before looking for preferred meals first run the `classify-prompt-if-food-or-other` tool to understand whether the prompt is about a food preference or not.
-- Propose ALL matching dishes from the `dish-selection-service` result.
+- Propose ALL matching dishes from the `find-dishes-service` result.
 - If the customer confirms a dish, call the `order-dish-service` tool.
 - Once the order is placed, thank them and summarize the dish names with the estimated delivery time.
 

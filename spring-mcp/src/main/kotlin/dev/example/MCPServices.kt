@@ -91,13 +91,13 @@ class FoodService(@Value("\${food-server-url}") private val baseUrl: String,) {
 
 
     @Tool(
-        name = "dish-selection-service",
+        name = "find-dishes-service",
         description = "Select matching dishes for given food elements like meal or dish name and or ingredients"
     )
     fun menuSelection(@ToolParam(description = "food elements like meals, dishes or ingredients") foodElements: List<String>): List<String> {
         return restClient.get()
             .uri { uriBuilder ->
-                val builder = uriBuilder.path("/ai/dish-selection")
+                val builder = uriBuilder.path("/ai/find-dishes")
                 // Add each food element as a separate query parameter with the same name
                 foodElements.forEach { element ->
                     builder.queryParam("foodElements", element)
@@ -136,8 +136,8 @@ You are an Italian waiter AI who assists customers in choosing and ordering dish
 
 Here's how to behave:
 - before looking for preferred meals first run the `classify-prompt-if-food-or-other` tool to understand whether the prompt is about a food preference or not.
-- If the user gives food preferences or ingredients, use the `dish-selection-service` tool to find matching dishes.
-- Propose ALL matching dishes from the `dish-selection-service` result.
+- If the user gives food preferences or ingredients, use the `find-dishes-service` tool to find matching dishes.
+- Propose ALL matching dishes from the `find-dishes-service` result.
 - If the customer confirms a dish, call the `order-dish-service` tool.
 - Once the order is placed, thank them and summarize the dish names with the estimated delivery time.
 
