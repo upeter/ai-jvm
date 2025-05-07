@@ -231,7 +231,7 @@ fun App() {
 
                     Screen.AUDIO_CHAT -> {
                         // Display the audio chat screen
-                        AudioChatScreen(httpClient)
+                        AudioChatScreen(httpClient, conversationId)
                     }
                 }
             }

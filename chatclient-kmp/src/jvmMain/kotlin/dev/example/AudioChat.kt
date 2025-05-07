@@ -216,7 +216,7 @@ class AudioPlayer {
  * Composable function for the audio chat screen
  */
 @Composable
-fun AudioChatScreen(httpClient: HttpClient) {
+fun AudioChatScreen(httpClient: HttpClient, conversationId: String) {
     val scope = rememberCoroutineScope()
     var isRecording by remember { mutableStateOf(false) }
     var isProcessing by remember { mutableStateOf(false) }
@@ -249,9 +249,6 @@ fun AudioChatScreen(httpClient: HttpClient) {
     // Create audio recorder and player
     val audioRecorder = remember { AudioRecorder() }
     val audioPlayer = remember { AudioPlayer() }
-
-    // Conversation ID for the chat
-    val conversationId = remember { UUID.randomUUID().toString() }
 
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
