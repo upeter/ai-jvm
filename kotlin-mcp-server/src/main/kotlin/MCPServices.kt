@@ -33,6 +33,7 @@ import kotlinx.io.buffered
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.io.asSource
 import kotlinx.serialization.json.*
+import kotlin.text.append
 
 class MCPServices {}
 fun configureMCPServer(): Server {
@@ -83,7 +84,10 @@ fun configureMCPServer(): Server {
 
 
     suspend fun selectDishes(foodElements:List<String>): List<String> {
-        val response: HttpResponse = httpClient.get("$baseUrl/ai/find-dishes?foodElements=${foodElements.joinToString(",")}") {
+        val response: HttpResponse = httpClient.get("$baseUrl/ai/find-dishes"){
+            url {
+                parameters.append("foodElements", foodElements.joinToString(","))
+            }
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
         }
@@ -184,7 +188,7 @@ fun configureMCPServer(): Server {
         description = """Dish order service for the italian delaight restaurant.""".trimIndent(),
         inputSchema = Tool.Input(
             properties =  buildJsonObject {
-                put("foodElements", buildJsonObject {
+                put("meals", buildJsonObject {
                     put("type", JsonPrimitive("array"))
                     put("items", buildJsonObject {
                         put("type", JsonPrimitive("string"))

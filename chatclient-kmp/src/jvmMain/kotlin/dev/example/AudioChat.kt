@@ -225,7 +225,15 @@ fun AudioChatScreen(httpClient: HttpClient) {
     // Animation for the record button
     val animatedSize by animateFloatAsState(
         targetValue = if (isRecording) 1.2f else 1f,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = if (isRecording) {
+            infiniteRepeatable(
+                animation = tween(durationMillis = 500),
+                repeatMode = RepeatMode.Reverse
+            )
+        } else {
+            tween(durationMillis = 300)
+        },
+        label = "recordButtonScale"
     )
 
     // Animation for the agent icon
