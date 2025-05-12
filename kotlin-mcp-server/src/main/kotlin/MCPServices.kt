@@ -35,11 +35,11 @@ import kotlinx.io.asSource
 import kotlinx.serialization.json.*
 import kotlin.text.append
 
-class MCPServices {}
+
 fun configureMCPServer(): Server {
     val server = Server(
         Implementation(
-            name = "mcp-kotlin test server",
+            name = "mcp-server italian delaight",
             version = "0.1.0"
         ),
         ServerOptions(
@@ -50,51 +50,27 @@ fun configureMCPServer(): Server {
             )
         )
     )
-    // Base URL for the Weather API
-    val baseUrl = "http://localhost:8080"
 
-    // Create an HTTP client with a default request configuration and JSON content negotiation
-    val httpClient = HttpClient {
-//        defaultRequest {
-//            url(baseUrl)
-//            headers {
-//                append("Accept", "application/geo+json")
-//                append("User-Agent", "WeatherApiClient/1.0")
-//            }
-//            contentType(ContentType.Application.Json)
-//        }
-        // Install content negotiation plugin for JSON serialization/deserialization
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                prettyPrint = true
-            })
-        }
+
+    // Add a resource
+    server.addResource(
+        uri = "file:///italian/delaight/menu.md",
+        name = "complete-menu-italian-delaight-restaurant",
+        description = "The complete menu and dishes of the Italian DelAIght restaurant",
+        mimeType = "text/markdown"
+    ) { request ->
+        ReadResourceResult(
+            contents = listOf(
+                TextResourceContents(
+                    text = MCPServices::class.java.getResourceAsStream("/menu.md").reader().readText(),
+                    uri = "unknown",
+                    mimeType = "text/markdown"
+                )
+            )
+        )
     }
 
-    suspend fun orderDish(order: OrderRequest): OrderResponse {
-        val response: HttpResponse = httpClient.post("$baseUrl/ai/order-dish") {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(order)
-        }
-        return response.body()
-    }
-
-
-
-    suspend fun selectDishes(foodElements:List<String>): List<String> {
-        val response: HttpResponse = httpClient.get("$baseUrl/ai/find-dishes"){
-            url {
-                parameters.append("foodElements", foodElements.joinToString(","))
-            }
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-        }
-        return response.body()
-    }
-
-
+    // Add a prompt
     server.addPrompt(
         name = "italian-meal-agent",
         description = "suggests dishes and handles orders using a conversational waiter AI of the Italian DelAIght restaurant",
@@ -111,26 +87,15 @@ fun configureMCPServer(): Server {
         )
     }
 
-    // Add a resource
-    server.addResource(
-        uri = "file:///italian/delaight/menu.md",
-        name = "complete-menu-italian-delaight-restaurant",
-        description = "The complete menu and dishes of the Italian DelAIght restaurant",
-        mimeType = "text/markdown"
-    ) { request ->
-        ReadResourceResult(
-            contents = listOf(
-                TextResourceContents(text = MCPServices::class.java.getResourceAsStream("/menu.md").reader().readText(), uri = "unknown", mimeType =  "text/markdown")
-            )
-        )
-    }
-
-
+    // Add a tools
     server.addTool(
         name = "classify-prompt-if-food-or-other",
         description = "Classifies a prompt to verify whether it is food or something else. If classified as food, extracted food items are returned.",
     ) { request ->
-        CallToolResult(content = listOf(TextContent("""
+        CallToolResult(
+            content = listOf(
+                TextContent(
+                    """
         |Classify the following prompt as 'food' or 'other'. If it is about food, extract dish name and/or ingredients. 
         |The prompt is=[${request.arguments}]
         |Your response should be in JSON format.
@@ -155,7 +120,10 @@ fun configureMCPServer(): Server {
         |   },
         |   "additionalProperties": false
         |}```
-        |""".trimMargin())))
+        |""".trimMargin()
+                )
+            )
+        )
     }
 
 
@@ -163,7 +131,7 @@ fun configureMCPServer(): Server {
         name = "find-dishes-service",
         description = """Select matching dishes for given food elements like meal or dish name and or ingredients.""".trimIndent(),
         inputSchema = Tool.Input(
-            properties =  buildJsonObject {
+            properties = buildJsonObject {
                 put("foodElements", buildJsonObject {
                     put("type", JsonPrimitive("array"))
                     put("items", buildJsonObject {
@@ -171,9 +139,11 @@ fun configureMCPServer(): Server {
                     })
                 })
             },
-            required = listOf("foodElements"),)
+            required = listOf("foodElements"),
+        )
     ) { request ->
-        val dishSelectionRequest = request.arguments.get("foodElements")?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
+        val dishSelectionRequest =
+            request.arguments.get("foodElements")?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
 
         val selectedDishes = selectDishes(dishSelectionRequest)
 
@@ -187,7 +157,7 @@ fun configureMCPServer(): Server {
         name = "order-dish-service",
         description = """Dish order service for the italian delaight restaurant.""".trimIndent(),
         inputSchema = Tool.Input(
-            properties =  buildJsonObject {
+            properties = buildJsonObject {
                 put("meals", buildJsonObject {
                     put("type", JsonPrimitive("array"))
                     put("items", buildJsonObject {
@@ -195,7 +165,8 @@ fun configureMCPServer(): Server {
                     })
                 })
             },
-            required = listOf("meals"),)
+            required = listOf("meals"),
+        )
     ) { request ->
         val orderRequest = Json.decodeFromJsonElement<OrderRequest>(request.arguments)
 
@@ -208,10 +179,12 @@ fun configureMCPServer(): Server {
 
 
 
+
+
     return server
 }
 
- val ITALIAN_AGENT_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
+val ITALIAN_AGENT_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
 Here's how to behave:
 - If the user wants to have some ideas about dishes run `complete-menu-italian-delaight-restaurant` to have the complete menu.
 - If the user gives food preferences or ingredients, use the `find-dishes-service` tool to find matching dishes.
@@ -253,6 +226,42 @@ fun runMcpServerUsingStdio() {
 
 fun main(args: Array<String>) {
     runMcpServerUsingStdio()
+}
+
+class MCPServices {}
+
+// Base URL for the API
+val baseUrl = "http://localhost:8080"
+
+// Create an HTTP client with a default request configuration and JSON content negotiation
+val httpClient = HttpClient {
+    install(ContentNegotiation) {
+        json(Json {
+            ignoreUnknownKeys = true
+            prettyPrint = true
+        })
+    }
+}
+
+suspend fun orderDish(order: OrderRequest): OrderResponse {
+    val response: HttpResponse = httpClient.post("$baseUrl/ai/order-dish") {
+        contentType(ContentType.Application.Json)
+        accept(ContentType.Application.Json)
+        setBody(order)
+    }
+    return response.body()
+}
+
+
+suspend fun selectDishes(foodElements: List<String>): List<String> {
+    val response: HttpResponse = httpClient.get("$baseUrl/ai/find-dishes") {
+        url {
+            parameters.append("foodElements", foodElements.joinToString(","))
+        }
+        contentType(ContentType.Application.Json)
+        accept(ContentType.Application.Json)
+    }
+    return response.body()
 }
 
 //{ "jsonrpc": "2.0", "method": "resources/read","params": {  "uri" : "file:///italian/delaight/menu.md", "resource": "complete-menu-italian-delaight-restaurant" },"id": 1 }
