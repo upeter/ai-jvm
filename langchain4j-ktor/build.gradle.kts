@@ -38,6 +38,12 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:${Versions.ktor_version}")
     implementation("io.ktor:ktor-server-call-logging:${Versions.ktor_version}")
 
+    // Ktor HTTP client dependencies
+    implementation("io.ktor:ktor-client-core:${Versions.ktor_version}")
+    implementation("io.ktor:ktor-client-cio:${Versions.ktor_version}")
+    implementation("io.ktor:ktor-client-content-negotiation:${Versions.ktor_version}")
+    implementation("io.ktor:ktor-client-logging:${Versions.ktor_version}")
+
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:${Versions.kotlin_version}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin_version}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin_version}")
