@@ -130,34 +130,15 @@ fun configureMCPServer(): Server {
         name = "classify-prompt-if-food-or-other",
         description = "Classifies a prompt to verify whether it is food or something else. If classified as food, extracted food items are returned.",
     ) { request ->
-        CallToolResult(content = listOf(TextContent("""
-        |Classify the following prompt as 'food' or 'other'. If it is about food, extract dish name and/or ingredients. 
-        |The prompt is=[${request.arguments}]
-        |Your response should be in JSON format.
-        |Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
-        |Do not include markdown code blocks in your response.
-        |Remove the ```json markdown from the output.
-        |Here is the JSON Schema instance your output must adhere to:
-        |```{
-        |   "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-        |   "type": "object",
-        |   "properties": {
-        |       "classification": {
-        |           "type": "string",
-        |           "enum": ["FOOD", "OTHER"]
-        |        },
-        |       "foodElements": {
-        |           "type": "array",
-        |           "items": {
-        |                "type": "string"
-        |           }
-        |       }
-        |   },
-        |   "additionalProperties": false
-        |}```
-        |""".trimMargin())))
+        CallToolResult(
+            content = listOf(
+                TextContent(
+                    """
+        \"Classify the following prompt as 'food' or 'other'. If it is about food, extract dish name and/or ingredients. The prompt is=[${request.arguments}]\\nYour response should be in JSON format.\\nDo not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.\\nDo not include markdown code blocks in your response.\\nRemove the ```json markdown from the output.\\nHere is the JSON Schema instance your output must adhere to:\\n```{\\n  \\\"${'$'}schema\\\" : \\\"https://json-schema.org/draft/2020-12/schema\\\",\\n    \\\"type\\\" : \\\"object\\\",\\n      \\\"properties\\\" : {\\n          \\\"classification\\\" : {\\n                \\\"type\\\" : \\\"string\\\",\\n                      \\\"enum\\\" : [ \\\"FOOD\\\", \\\"OTHER\\\" ]\\n                          },\\n                              \\\"foodElements\\\" : {\\n                                    \\\"type\\\" : \\\"array\\\",\\n                                          \\\"items\\\" : {\\n                                                  \\\"type\\\" : \\\"string\\\"\\n                                                        }\\n                                                            }\\n                                                              },\\n                                                                \\\"additionalProperties\\\" : false\\n                                                                }```\\n                                                                \"""".trimMargin()
+                )
+            )
+        )
     }
-
 
     server.addTool(
         name = "find-dishes-service",
