@@ -4,7 +4,7 @@
       "command": "java",
       "args": [
         "-jar",
-        "/Users/urs/development/github/ai/kotlin-ai-talk/spring-mcp/target/spring-mcp-0.0.1-SNAPSHOT.jar"
+        "/Users/urs/development/github/ai/kotlin-ai-talk/spring-mcp-server/target/spring-mcp-server-0.0.1-SNAPSHOT.jar"
       ],
       "env": {
       }
