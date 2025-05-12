@@ -202,20 +202,20 @@ class AiConfig {
         }
     }
 
+    @Bean
+    fun menuService(vectorStore: VectorStore): ToolCallback {
+        return FunctionToolCallback.builder("menuService", MenuService(vectorStore))
+            .inputType(MenuRequest::class.java)
+            .description("Find matching dishes based on dish name or ingredients")
+            .build()
+    }
+
 
     @Bean
     fun orderService(): ToolCallback {
         return FunctionToolCallback.builder("orderService", OrderService())
             .inputType(OrderRequest::class.java)
             .description("Order meal for customer")
-            .build()
-    }
-
-    @Bean
-    fun menuService(vectorStore: VectorStore): ToolCallback {
-        return FunctionToolCallback.builder("menuService", MenuService(vectorStore))
-            .inputType(MenuRequest::class.java)
-            .description("Find matching dishes based on dish name or ingredients")
             .build()
     }
 }
@@ -229,12 +229,11 @@ class OrderService() : java.util.function.Function<OrderRequest, OrderResponse> 
     override fun apply(orderRequest: OrderRequest): OrderResponse {
         logger.info(
             "\n*****************************************************************************\n" +
-                    "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
-                    "*****************************************************************************\n\n"
+              "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
+              "*****************************************************************************\n\n"
         )
-        return OrderResponse(20)
+        return OrderResponse(deliveredInMinutes = 20)
     }
-
 }
 
 
@@ -247,14 +246,13 @@ class MenuService(val vectorStore: VectorStore) : java.util.function.Function<Me
     override fun apply(dish: MenuRequest): MenuResponse {
         logger.info(
             "\n-------------------------------------------------------------\n" +
-                    "🧑‍🍳Calling menu service 🧑‍🍳\n" +
-                    "-------------------------------------------------------------\n\n"
+            "🧑‍🍳Calling menu service 🧑‍🍳\n" +
+            "-------------------------------------------------------------\n\n"
         )
         return MenuResponse(
             vectorStore.similaritySearch(dish.dish).orEmpty()
                 .mapNotNull { "Dish: ${it.metadata["Name"]} Dish with Ingredients: ${it.text}" })
     }
-
 }
 
 
