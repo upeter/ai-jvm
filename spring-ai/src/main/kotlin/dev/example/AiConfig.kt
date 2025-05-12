@@ -56,7 +56,7 @@ import org.springframework.web.client.RestClient
 @Configuration
 class AiConfig {
     @Bean
-    fun remoteChatClient(
+    fun chatClient(
         openAiChatModel: OpenAiChatModel, chatMemory: ChatMemory,
     ): ChatClient {
         return ChatClient.builder(openAiChatModel)
@@ -67,10 +67,10 @@ class AiConfig {
             .build()
     }
 
-    @Bean
-    fun localChatClient(ollamaChatModel: OllamaChatModel): ChatClient {
-        return ChatClient.builder(ollamaChatModel).build()
-    }
+//    @Bean
+//    fun localChatClient(ollamaChatModel: OllamaChatModel): ChatClient {
+//        return ChatClient.builder(ollamaChatModel).build()
+//    }
 
 
     @Bean

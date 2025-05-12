@@ -41,6 +41,21 @@ internal class AIController(
 
 
 
+    @PostMapping("/ai/chat")
+    fun chat(@RequestBody chatInput: ChatInput): String? {
+        val relatedDocuments = vectorStore
+            .similaritySearch(chatInput.message).orEmpty()
+        return this.chatClient
+            .prompt()
+            .system(SYSTEM_PROMPT)
+            .user(createPrompt(chatInput.message, relatedDocuments))
+            .advisors{
+                it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
+                    .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
+            .call()
+            .content()
+    }
+
 
 
 
