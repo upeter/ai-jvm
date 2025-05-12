@@ -190,6 +190,7 @@ fun App() {
                                 onValueChange = { inputText = it },
                                 modifier = Modifier
                                     .weight(1f)
+                                    .padding(start = 8.dp, bottom = 8.dp)
                                     .focusRequester(inputFieldFocus)
                                     .focusProperties {
                                         next = sendButtonFocus
@@ -218,6 +219,7 @@ fun App() {
                             Button(
                                 onClick = { sendMessage() },
                                 modifier = Modifier
+                                    .padding(end = 8.dp, bottom = 8.dp)
                                     .focusRequester(sendButtonFocus)
                                     .focusProperties {
                                         previous = inputFieldFocus

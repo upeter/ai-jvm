@@ -64,8 +64,8 @@ internal class AIController(
             .content()
 
 
-    @PostMapping("/ai/chat")
-    fun chat(@RequestBody chatInput: ChatInput): String? {
+    @PostMapping("/ai/chat-no-tools")
+    fun chatNoTools(@RequestBody chatInput: ChatInput): String? {
         val relatedDocuments = vectorStore
             .similaritySearch(chatInput.message).orEmpty()
         return this.remoteChatClient
@@ -77,6 +77,21 @@ internal class AIController(
                   .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
             .tools("orderService")
             //.tools(SyncMcpToolCallbackProvider(mcpSyncClients))
+            .call()
+            .content()
+    }
+
+    @PostMapping("/ai/chat")
+    fun chat(@RequestBody chatInput: ChatInput): String? {
+        return this.remoteChatClient
+            .prompt()
+            .system(MCP_PROMPT)
+            .user(chatInput.message)
+            .advisors{
+                it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
+                    .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
+            //.tools("orderService")
+            .tools(SyncMcpToolCallbackProvider(mcpSyncClients))
             .call()
             .content()
     }
@@ -137,6 +152,17 @@ internal class AIController(
 
 
     companion object {
+         val MCP_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
+Here's how to behave:
+- If the user wants to have some ideas about dishes run `complete-menu-italian-delaight-restaurant` to have the complete menu.
+- If the user gives food preferences or ingredients, use the `find-dishes-service` tool to find matching dishes.
+- before looking for preferred meals first run the `classify-prompt-if-food-or-other` tool to understand whether the prompt is about a food preference or not.
+- Propose ALL matching dishes from the `find-dishes-service` result.
+- If the customer confirms a dish, call the `order-dish-service` tool.
+- Once the order is placed, thank them and summarize the dish names with the estimated delivery time.
+
+Only use the tools to gather or act on information. Do not invent dishes. Be polite, helpful, and speak in a friendly English tone.
+""".trimIndent()
         const val SYSTEM_PROMPT = """
         You are an Italian waiter. Respond in a friendly, helpful manner always in English.
 

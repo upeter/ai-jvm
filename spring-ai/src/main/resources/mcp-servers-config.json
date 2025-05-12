@@ -1,19 +1,6 @@
 {
   "mcpServers": {
-    "brave-search": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-brave-search"
-      ],
-      "env": {
-      }
-    },
-      "jetbrains": {
-        "command": "npx",
-        "args": ["-y", "@jetbrains/mcp-proxy"]
-      },
-    "local-file-system-search": {
+    "italian-delight-tools": {
       "command": "java",
       "args": [
         "-jar",
