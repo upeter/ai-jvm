@@ -202,11 +202,11 @@ fun App() {
                                                     sendButtonFocus.requestFocus()
                                                     true // Consume the event to prevent default behavior
                                                 }
-        //                                        Key.Enter -> {
-        //                                            // Send message when Enter is pressed
-        //                                            sendMessage()
-        //                                            true // Consume the event
-        //                                        }
+                                                Key.Enter -> {
+                                                    // Send message when Enter is pressed
+                                                    sendMessage()
+                                                    true // Consume the event
+                                                }
                                                 else -> false // Don't consume other key events
                                             }
                                     },
