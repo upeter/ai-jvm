@@ -9,12 +9,15 @@ import io.ktor.server.routing.*
 /**
  * Configure the AI routes
  */
-fun Route.aiRoutes(chatLanguageModel: ChatLanguageModel,
-                   streamingChatLanguageModel: StreamingChatLanguageModel) {
+fun Route.aiRoutes(
+    chatLanguageModel: ChatLanguageModel,
+    streamingChatLanguageModel: StreamingChatLanguageModel) {
+
     get("/ai/ask") {
         val message = call.request.queryParameters["message"] ?: return@get missingParameterReply()
         val response = chatLanguageModel.generate(message)
         call.respondText(response)
+
     }
 
     get("/ai/ask/stream") {
