@@ -9,6 +9,13 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.sse.*
 import io.modelcontextprotocol.kotlin.sdk.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.GetPromptResult
 import io.modelcontextprotocol.kotlin.sdk.Implementation
@@ -22,10 +29,12 @@ import io.modelcontextprotocol.kotlin.sdk.TextResourceContents
 import io.modelcontextprotocol.kotlin.sdk.Tool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
+import io.modelcontextprotocol.kotlin.sdk.server.SseServerTransport
+import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import io.modelcontextprotocol.kotlin.sdk.server.mcp
 import kotlinx.serialization.Serializable
 import io.ktor.utils.io.streams.*
 import io.modelcontextprotocol.kotlin.sdk.*
-import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asSink
@@ -50,6 +59,132 @@ fun configureMCPServer(): Server {
             )
         )
     )
+
+
+    // Add a resource
+    server.addResource(
+        uri = "file:///italian/delaight/menu.md",
+        name = "complete-menu-italian-delaight-restaurant",
+        description = "The complete menu and dishes of the Italian DelAIght restaurant",
+        mimeType = "text/markdown"
+    ) { request ->
+        ReadResourceResult(
+            contents = listOf(
+                TextResourceContents(
+                    text = MCPServices::class.java.getResourceAsStream("/menu.md").reader().readText(),
+                    uri = "unknown",
+                    mimeType = "text/markdown"
+                )
+            )
+        )
+    }
+
+    // Add a prompt
+    server.addPrompt(
+        name = "italian-meal-agent",
+        description = "suggests dishes and handles orders using a conversational waiter AI of the Italian DelAIght restaurant",
+        arguments = emptyList()
+    ) { request ->
+        GetPromptResult(
+            description = null,
+            messages = listOf(
+                PromptMessage(
+                    role = Role.user,
+                    content = TextContent(ITALIAN_AGENT_PROMPT)
+                )
+            )
+        )
+    }
+
+    // Add a tools
+    server.addTool(
+        name = "classify-prompt-if-food-or-other",
+        description = "Classifies a prompt to verify whether it is food or something else. If classified as food, extracted food items are returned.",
+    ) { request ->
+        CallToolResult(
+            content = listOf(
+                TextContent(
+                    """
+        |Classify the following prompt as 'food' or 'other'. If it is about food, extract dish name and/or ingredients. 
+        |The prompt is=[${request.arguments}]
+        |Your response should be in JSON format.
+        |Do not include any explanations, only provide a RFC8259 compliant JSON response following this format without deviation.
+        |Do not include markdown code blocks in your response.
+        |Remove the ```json markdown from the output.
+        |Here is the JSON Schema instance your output must adhere to:
+        |```{
+        |   "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+        |   "type": "object",
+        |   "properties": {
+        |       "classification": {
+        |           "type": "string",
+        |           "enum": ["FOOD", "OTHER"]
+        |        },
+        |       "foodElements": {
+        |           "type": "array",
+        |           "items": {
+        |                "type": "string"
+        |           }
+        |       }
+        |   },
+        |   "additionalProperties": false
+        |}```
+        |""".trimMargin()
+                )
+            )
+        )
+    }
+
+
+    server.addTool(
+        name = "find-dishes-service",
+        description = """Select matching dishes for given food elements like meal or dish name and or ingredients.""".trimIndent(),
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("foodElements", buildJsonObject {
+                    put("type", JsonPrimitive("array"))
+                    put("items", buildJsonObject {
+                        put("type", JsonPrimitive("string"))
+                    })
+                })
+            },
+            required = listOf("foodElements"),
+        )
+    ) { request ->
+        val dishSelectionRequest =
+            request.arguments.get("foodElements")?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
+
+        val selectedDishes = selectDishes(dishSelectionRequest)
+
+        CallToolResult(
+            content = selectedDishes.map { TextContent(it) }
+        )
+    }
+
+
+    server.addTool(
+        name = "order-dish-service",
+        description = """Dish order service for the italian delaight restaurant.""".trimIndent(),
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("meals", buildJsonObject {
+                    put("type", JsonPrimitive("array"))
+                    put("items", buildJsonObject {
+                        put("type", JsonPrimitive("string"))
+                    })
+                })
+            },
+            required = listOf("meals"),
+        )
+    ) { request ->
+        val orderRequest = Json.decodeFromJsonElement<OrderRequest>(request.arguments)
+
+        val orderResponse = orderDish(orderRequest)
+
+        CallToolResult(
+            content = listOf(TextContent("Order placed! Dishes will be delivered in ${orderResponse.deliveredInMinutes} minutes."))
+        )
+    }
 
 
 
@@ -82,8 +217,27 @@ fun runMcpServerUsingStdio() {
     }
 }
 
+
+fun runSseMcpServer(port: Int): Unit = runBlocking {
+    println("Starting sse server on port $port")
+    println("Use inspector to connect to the http://localhost:$port/sse")
+
+    embeddedServer(CIO, host = "0.0.0.0", port = port) {
+        mcp {
+            return@mcp configureMCPServer()
+        }
+    }.start(wait = true)
+}
+
 fun main(args: Array<String>) {
-    runMcpServerUsingStdio()
+    val command = args.firstOrNull() ?: "--stdio"
+    val port = args.getOrNull(1)?.toIntOrNull() ?: 3001
+    when (command) {
+        "--stdio" -> runMcpServerUsingStdio2()
+        "--sse-server" -> runSseMcpServer(port)
+        else -> runMcpServerUsingStdio2()
+
+    }
 }
 
 val ITALIAN_AGENT_PROMPT = """ 
