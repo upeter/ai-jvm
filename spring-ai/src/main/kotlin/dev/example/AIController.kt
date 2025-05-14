@@ -81,20 +81,27 @@ internal class AIController(
             .content()
     }
 
+
+
+
     @PostMapping("/ai/chat")
     fun chat(@RequestBody chatInput: ChatInput): String? {
+        val relatedDocuments = vectorStore
+            .similaritySearch(chatInput.message).orEmpty()
         return this.remoteChatClient
             .prompt()
-            .system(MCP_PROMPT)
-            .user(chatInput.message)
+            .system(SYSTEM_PROMPT)
+            .user(createPrompt(chatInput.message, relatedDocuments))
             .advisors{
                 it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
                     .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
-            //.tools("orderService")
-            .tools(SyncMcpToolCallbackProvider(mcpSyncClients))
+            .tools("orderService")
             .call()
             .content()
     }
+
+
+
 
     @PostMapping("/ai/speech")
     fun speech(@RequestBody chatInput: ChatInput): ByteArray {
@@ -174,7 +181,7 @@ Only use the tools to gather or act on information. Do not invent dishes. Be pol
 
         Dish Suggestions:
         Only if the user input is about food preferences use the context provided in the user message under 'Dish Context'.
-        Only propose dishes from this context; do not invent dishes yourself. Propose ALL the possible options from the context.
+        Only propose dishes from this context; do not invent dishes yourself. Propose ALL the possible options from the context, but at least 3.
         Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
 
         Order:
