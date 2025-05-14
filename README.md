@@ -1,13 +1,11 @@
-# Sources for JFall 2024 talk 
-## From 0 to H-AI-ro: how to unlock the power of generative AI with LangChain4J and Spring AI
-## Quick Youtube intro from foojay.io interview with Frank Delporte:
-- https://www.youtube.com/watch?v=O9ODm4ojg8I&ab_channel=FrankDelporte
+# Sources for KotlinConf 2025 talk 
+## From 0 to H-AI-ro: fast track to AI for Kotlin developers.
 
 ## Run the examples
 - Install the Kotlin Notebooks plugin in IntelliJ
 - You need an OpenAI API key
 
-### LangChain4J in module: `/langchain4j`
+### LangChain4J with Spring Boot in module: `/langchain4j`
 
 #### Run LangChain4J sample application
 - Provide the OpenAI key OPENAI_API_KEY in the environment
@@ -24,6 +22,15 @@
 - Open the notebook: [langchain4j-ingest.ipynb](langchain4j/langchain4j-ingest.ipynb)
 - Run code snippets to ingest data
 
+
+### LangChain4J with ktor in module: `/langchain4j-ktor`
+
+#### Run LangChain4J-ktor sample application
+- Provide the OpenAI key OPENAI_API_KEY in the environment
+- Run application: [Application.kt](langchain4j/src/main/kotlin/dev/example/LangChain4JDemoApplication.kt)
+- Run Samples in the notebook: [/langchain4j/langchain4j-demo.ipynb](langchain4j/langchain4j-demo.ipynb)
+
+
 ### SpringAI in module: `/spring-ai`
 
 #### Run SpringAI sample application
@@ -34,6 +41,5 @@
 - Run Samples in the notebook: [spring-ai-demo.ipynb](spring-ai/spring-ai-demo.ipynb)
 
 
-#### Run CLI Chat Client
-- Run CLI Chat Client `main` in  [ChatClient.kt](spring-ai/src/test/kotlin/dev/example/ChatClient.kt) in the `spring-ai` module
-- Type `help` to see the available commands
+#### Run KMP chat / audio client
+- Run KMP Chat Client `main` in  [Main.kt](spring-ai/src/test/kotlin/dev/example/ChatClient.kt) in the `chatclient-kmp` module
