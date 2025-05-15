@@ -25,6 +25,7 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +37,6 @@ import java.io.FileOutputStream
 import java.util.*
 import javax.sound.sampled.*
 import javazoom.jl.player.Player
-import kotlin.concurrent.thread
 import kotlin.io.readBytes
 
 /**
@@ -47,6 +47,17 @@ class AudioRecorder {
     private var targetDataLine: TargetDataLine? = null
     private var recording = false
     private val byteArrayOutputStream = ByteArrayOutputStream()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var recordingJob: Job? = null
+
+    fun cleanup() {
+        recording = false
+        recordingJob?.cancel()
+        recordingJob = null
+        targetDataLine?.stop()
+        targetDataLine?.close()
+        coroutineScope.cancel()
+    }
 
     fun startRecording() {
         try {
@@ -57,10 +68,10 @@ class AudioRecorder {
 
             recording = true
 
-            // Start recording in a separate thread
-            thread {
+            // Start recording in a coroutine
+            recordingJob = coroutineScope.launch {
                 val data = ByteArray(targetDataLine!!.bufferSize / 5)
-                while (recording) {
+                while (recording && isActive) {
                     val count = targetDataLine!!.read(data, 0, data.size)
                     if (count > 0) {
                         byteArrayOutputStream.write(data, 0, count)
@@ -75,6 +86,8 @@ class AudioRecorder {
 
     fun stopRecording(): ByteArray {
         recording = false
+        recordingJob?.cancel()
+        recordingJob = null
         targetDataLine?.stop()
         targetDataLine?.close()
 
@@ -176,7 +189,13 @@ class AudioRecorder {
  */
 class AudioPlayer {
     private var player: Player? = null
-    private var playerThread: Thread? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var playerJob: Job? = null
+
+    fun cleanup() {
+        stop()
+        coroutineScope.cancel()
+    }
 
     fun playAudio(audioData: ByteArray, onComplete: () -> Unit) {
         try {
@@ -187,15 +206,19 @@ class AudioPlayer {
             val inputStream = ByteArrayInputStream(audioData)
             player = Player(inputStream)
 
-            // Play in a separate thread
-            playerThread = thread {
+            // Play in a coroutine
+            playerJob = coroutineScope.launch {
                 try {
                     player?.play()
-                    // When playback is complete, call onComplete
-                    onComplete()
+                    // When playback is complete, call onComplete on the main thread
+                    withContext(Dispatchers.Main) {
+                        onComplete()
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    onComplete()
+                    withContext(Dispatchers.Main) {
+                        onComplete()
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -206,9 +229,9 @@ class AudioPlayer {
 
     fun stop() {
         player?.close()
-        playerThread?.interrupt()
+        playerJob?.cancel()
         player = null
-        playerThread = null
+        playerJob = null
     }
 }
 
@@ -249,6 +272,14 @@ fun AudioChatScreen(httpClient: HttpClient, conversationId: String) {
     // Create audio recorder and player
     val audioRecorder = remember { AudioRecorder() }
     val audioPlayer = remember { AudioPlayer() }
+
+    // Cleanup resources when the composable is disposed
+    DisposableEffect(Unit) {
+        onDispose {
+            audioRecorder.cleanup()
+            audioPlayer.cleanup()
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize().padding(16.dp),
