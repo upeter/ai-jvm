@@ -35,6 +35,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-cio:2.3.5")
                 implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
                 implementation("io.ktor:ktor-serialization-jackson:2.3.5")
+                implementation("io.ktor:ktor-client-core-jvm:2.3.5")
 
                 // Jackson for JSON serialization
                 implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")

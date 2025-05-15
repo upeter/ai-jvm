@@ -35,6 +35,9 @@ fun App() {
 
     val httpClient = remember {
         HttpClient(CIO) {
+            engine {
+                requestTimeout = 30_000 // 30 seconds
+            }
             install(ContentNegotiation) {
                 jackson()
             }
