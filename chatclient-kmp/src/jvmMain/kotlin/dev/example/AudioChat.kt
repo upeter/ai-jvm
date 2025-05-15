@@ -36,6 +36,7 @@ import java.io.FileOutputStream
 import java.util.*
 import javax.sound.sampled.*
 import javazoom.jl.player.Player
+import kotlin.concurrent.thread
 import kotlin.io.readBytes
 
 /**
@@ -57,7 +58,7 @@ class AudioRecorder {
             recording = true
 
             // Start recording in a separate thread
-            Thread {
+            thread {
                 val data = ByteArray(targetDataLine!!.bufferSize / 5)
                 while (recording) {
                     val count = targetDataLine!!.read(data, 0, data.size)
@@ -66,7 +67,7 @@ class AudioRecorder {
                     }
                 }
                 byteArrayOutputStream.close()
-            }.start()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -187,7 +188,7 @@ class AudioPlayer {
             player = Player(inputStream)
 
             // Play in a separate thread
-            playerThread = Thread {
+            playerThread = thread {
                 try {
                     player?.play()
                     // When playback is complete, call onComplete
@@ -197,7 +198,6 @@ class AudioPlayer {
                     onComplete()
                 }
             }
-            playerThread?.start()
         } catch (e: Exception) {
             e.printStackTrace()
             onComplete()
