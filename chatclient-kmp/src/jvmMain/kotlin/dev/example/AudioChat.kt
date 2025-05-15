@@ -43,7 +43,7 @@ import kotlin.io.readBytes
  * Audio recorder class that handles recording audio using Java Sound API
  */
 class AudioRecorder {
-    private var audioFormat = AudioFormat(44100f, 16, 1, true, false)
+    private val audioFormat = AudioFormat(44100f, 16, 1, true, false)
     private var targetDataLine: TargetDataLine? = null
     private var recording = false
     private val byteArrayOutputStream = ByteArrayOutputStream()
