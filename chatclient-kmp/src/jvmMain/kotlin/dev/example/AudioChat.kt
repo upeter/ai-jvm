@@ -96,65 +96,61 @@ class AudioRecorder {
     }
 
     private fun convertToMp3(pcmData: ByteArray): ByteArray {
-        try {
+        return try {
             // Create temporary files for input and output
             val tempWavFile = File.createTempFile("recording", ".wav")
             val tempMp3File = File.createTempFile("recording", ".mp3")
 
             try {
                 // Write WAV header and PCM data to temporary WAV file
-                val wavOutputStream = FileOutputStream(tempWavFile)
+                FileOutputStream(tempWavFile).use { output ->
+                    // WAV header constants
+                    val sampleRate = 44100
+                    val channels = 1
+                    val bitsPerSample = 16
+                    val dataSize = pcmData.size
+                    val format = 1 // PCM
+                    val blockAlign = channels * bitsPerSample / 8
+                    val byteRate = sampleRate * blockAlign
 
-                // Write WAV header
-                val sampleRate = 44100
-                val channels = 1
-                val bitsPerSample = 16
-                val dataSize = pcmData.size
-                val format = 1 // PCM
-                val blockAlign = channels * bitsPerSample / 8
-                val byteRate = sampleRate * blockAlign
+                    // Write WAV header
+                    output.use {
+                        // RIFF header
+                        it.write("RIFF".toByteArray())
+                        it.write(intToByteArray(36 + dataSize)) // File size - 8
+                        it.write("WAVE".toByteArray())
 
-                // RIFF header
-                wavOutputStream.write("RIFF".toByteArray())
-                wavOutputStream.write(intToByteArray(36 + dataSize)) // File size - 8
-                wavOutputStream.write("WAVE".toByteArray())
+                        // fmt chunk
+                        it.write("fmt ".toByteArray())
+                        it.write(intToByteArray(16)) // Chunk size
+                        it.write(shortToByteArray(format.toShort())) // Format
+                        it.write(shortToByteArray(channels.toShort())) // Channels
+                        it.write(intToByteArray(sampleRate)) // Sample rate
+                        it.write(intToByteArray(byteRate)) // Byte rate
+                        it.write(shortToByteArray(blockAlign.toShort())) // Block align
+                        it.write(shortToByteArray(bitsPerSample.toShort())) // Bits per sample
 
-                // fmt chunk
-                wavOutputStream.write("fmt ".toByteArray())
-                wavOutputStream.write(intToByteArray(16)) // Chunk size
-                wavOutputStream.write(shortToByteArray(format.toShort())) // Format
-                wavOutputStream.write(shortToByteArray(channels.toShort())) // Channels
-                wavOutputStream.write(intToByteArray(sampleRate)) // Sample rate
-                wavOutputStream.write(intToByteArray(byteRate)) // Byte rate
-                wavOutputStream.write(shortToByteArray(blockAlign.toShort())) // Block align
-                wavOutputStream.write(shortToByteArray(bitsPerSample.toShort())) // Bits per sample
-
-                // data chunk
-                wavOutputStream.write("data".toByteArray())
-                wavOutputStream.write(intToByteArray(dataSize)) // Chunk size
-                wavOutputStream.write(pcmData) // Audio data
-                wavOutputStream.close()
+                        // data chunk
+                        it.write("data".toByteArray())
+                        it.write(intToByteArray(dataSize)) // Chunk size
+                        it.write(pcmData) // Audio data
+                    }
+                }
 
                 // Convert WAV to MP3 using lame
                 val process = ProcessBuilder(
-                    "lame", 
-                    "--preset", "standard", 
-                    tempWavFile.absolutePath, 
-                    tempMp3File.absolutePath
+                    "lame", "--preset", "standard", 
+                    tempWavFile.absolutePath, tempMp3File.absolutePath
                 ).start()
 
-                // Wait for the process to complete
-                val exitCode = process.waitFor()
-                if (exitCode != 0) {
-                    println("Error converting to MP3: lame exited with code $exitCode")
-                    val errorOutput = process.errorStream.bufferedReader().readText()
-                    println("Error output: $errorOutput")
-                    return pcmData // Return original data if conversion fails
+                // Check process result
+                if (process.waitFor() != 0) {
+                    println("Error converting to MP3: ${process.errorStream.bufferedReader().readText()}")
+                    pcmData // Return original data if conversion fails
+                } else {
+                    // Read and return the MP3 file
+                    tempMp3File.readBytes()
                 }
-
-                // Read the MP3 file
-                val mp3Data = tempMp3File.readBytes()
-                return mp3Data
             } finally {
                 // Clean up temporary files
                 tempWavFile.delete()
@@ -162,7 +158,7 @@ class AudioRecorder {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            return pcmData // Return original data if conversion fails
+            pcmData // Return original data if conversion fails
         }
     }
 
