@@ -53,8 +53,8 @@ fun configureMCPServer(): Server {
         ),
         ServerOptions(
             capabilities = ServerCapabilities(
-                prompts = ServerCapabilities.Prompts(listChanged = true),
                 resources = ServerCapabilities.Resources(subscribe = true, listChanged = false),
+                prompts = ServerCapabilities.Prompts(listChanged = true),
                 tools = ServerCapabilities.Tools(listChanged = true),
             )
         )
