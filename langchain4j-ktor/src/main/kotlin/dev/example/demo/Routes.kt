@@ -17,11 +17,6 @@ fun Route.aiRoutes(
         TODO()
     }
 
-    get("/ai/ask/stream") {
-        TODO()
-    }
-
-
 }
 
 
