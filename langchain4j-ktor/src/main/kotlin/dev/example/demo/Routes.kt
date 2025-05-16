@@ -14,21 +14,11 @@ fun Route.aiRoutes(
     streamingChatLanguageModel: StreamingChatLanguageModel) {
 
     get("/ai/ask") {
-        val message = call.request.queryParameters["message"] ?: return@get missingParameterReply()
-        val response = chatLanguageModel.generate(message)
-        call.respondText(response)
-
+        TODO()
     }
 
     get("/ai/ask/stream") {
-        val message = call.request.queryParameters["message"] ?: return@get missingParameterReply()
-        val responseFlow = streamingChatLanguageModel.generateFlow(message)
-        call.respondTextWriter {
-            responseFlow.collect { chunk ->
-                write(chunk)
-                flush()
-            }
-        }
+        TODO()
     }
 
 
