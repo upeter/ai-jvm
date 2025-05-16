@@ -20,9 +20,11 @@ import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.InputStreamResource
+import org.springframework.util.MimeTypeUtils
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import reactor.core.publisher.Flux
+import java.net.URL
 import java.util.*
 
 @RestController
@@ -41,6 +43,11 @@ internal class AIController(
             .stream()
             .content()
             .asFlow()
+
+
+
+
+
 
 
 
