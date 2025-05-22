@@ -12,6 +12,7 @@ import io.micrometer.observation.ObservationRegistry
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.map
 import org.jetbrains.kotlinx.dataframe.io.read
+import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor
@@ -213,7 +214,7 @@ class AiConfig {
 
     @Bean
     fun orderService(): ToolCallback {
-        return FunctionToolCallback.builder("orderService", OrderService())
+        return FunctionToolCallback.builder("orderService", orderService)
             .inputType(OrderRequest::class.java)
             .description("Order meal for customer")
             .build()
@@ -224,17 +225,15 @@ data class OrderRequest(val meals: List<String>)
 
 data class OrderResponse(val deliveredInMinutes: Int)
 
-class OrderService() : java.util.function.Function<OrderRequest, OrderResponse> {
-
-    override fun apply(orderRequest: OrderRequest): OrderResponse {
+val  orderService : (OrderRequest) -> OrderResponse =  { orderRequest ->
         logger.info(
             "\n*****************************************************************************\n" +
               "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
               "*****************************************************************************\n\n"
         )
-        return OrderResponse(deliveredInMinutes = 20)
+        OrderResponse(deliveredInMinutes = 20)
     }
-}
+
 
 
 data class MenuRequest(val dish: String)
@@ -255,6 +254,6 @@ class MenuService(val vectorStore: VectorStore) : java.util.function.Function<Me
     }
 }
 
-
+val logger = LoggerFactory.getLogger("OrderService")
 
 
