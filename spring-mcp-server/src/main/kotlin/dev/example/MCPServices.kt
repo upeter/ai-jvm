@@ -1,7 +1,7 @@
 package dev.example
 
+import org.springframework.ai.support.ToolCallbacks
 import org.springframework.ai.tool.ToolCallback
-import org.springframework.ai.tool.ToolCallbacks
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.beans.factory.annotation.Value
@@ -14,24 +14,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.requiredBody
 
-@Service
-class FileService {
-
-    @Tool(name = "list-files-in-directory", description = "List files in directory")
-    fun listFilesInDirectory(@ToolParam(description = "directory") directory: String, @ToolParam(description = "extension", required = false) extension:String?): List<String> {
-        val dir = java.io.File("$ROOT_DIR/$directory")
-        return if (dir.exists() && dir.isDirectory) {
-            dir.listFiles().filter {file -> extension?.let{file.name.lowercase().endsWith(it.lowercase())} != false }
-                .map { it.name }
-        } else {
-            emptyList()
-        }
-    }
-
-    companion object {
-        const val ROOT_DIR = "/Users/urs/"
-    }
-}
 
 @Service
 class FoodService(@Value("\${food-server-url}") private val baseUrl: String,) {
@@ -40,22 +22,6 @@ class FoodService(@Value("\${food-server-url}") private val baseUrl: String,) {
         .baseUrl(baseUrl)
         .build()
 
-
-//    @Tool(
-//        name = "classify-prompt-if-food-or-other",
-//        description = "Classifies a prompt to verify whether it is food or something else. If classified as food, extracted food items are returned."
-//    )
-//    fun classifyPrompt(@ToolParam(description = "prompt") prompt: String): PromptClassification? {
-//        return restClient.get()
-//            .uri { uriBuilder ->
-//                uriBuilder.path("/ai/prompt-classifier")
-//                    .queryParam("prompt", prompt)
-//                    .build()
-//            }
-//            .accept(MediaType.APPLICATION_JSON)
-//            .retrieve()
-//            .requiredBody()
-//    }
 
     @Tool(
         name = "classify-prompt-if-food-or-other",
@@ -163,7 +129,7 @@ data class OrderResponse(val deliveredInMinutes: Int)
 class McpConfig {
 
     @Bean
-    fun fileTool(fileService:FileService, foodService: FoodService): List<ToolCallback> =
-        ToolCallbacks.from(fileService, foodService).toList()
+    fun fileTool(foodService: FoodService): List<ToolCallback> =
+        ToolCallbacks.from(foodService).toList()
 
 }

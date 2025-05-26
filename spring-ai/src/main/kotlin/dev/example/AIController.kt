@@ -139,16 +139,16 @@ internal class AIController(
 
 
     @GetMapping("/ai/find-dishes")
-    fun menuSelection(@RequestParam("foodElements") foodElements: List<String>): List<String> {
-     return vectorStore
+    fun menuSelection(@RequestParam("foodElements") foodElements: List<String>): List<String> =
+     vectorStore
             .similaritySearch(foodElements.joinToString()).orEmpty().mapNotNull { it.text }
-    }
+
 
 
     @PostMapping("/ai/order-dish")
-    fun orderMeal(@RequestBody order: OrderRequest): OrderResponse {
-        return OrderService().apply(order)
-    }
+    fun orderMeal(@RequestBody order: OrderRequest): OrderResponse =
+        orderService(order)
+
 
 
     enum class Classification {
