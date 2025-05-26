@@ -45,11 +45,11 @@
 - Run KMP Chat Client `main` in  [Main.kt](spring-ai/src/test/kotlin/dev/example/ChatClient.kt) in the `chatclient-kmp` module
 - Chat Feature: 
   
-  <img src="kmp-app-chat.png" style="transform: scale(0.7); transform-origin: top left;">
+  <img src="kmp-app-chat.png" height="400">
 
 - Voice Feature:
 
-  <img src="kmp-app-voice.png" style="transform: scale(0.6); transform-origin: top left;">
+  <img src="kmp-app-voice.png" height="400">
 
 
 ### Kotlin MCP server + integration with Claude Desktop: `/kotlin-mcp-server`
