@@ -17,7 +17,8 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor
 import org.springframework.ai.chat.memory.ChatMemory
-import org.springframework.ai.chat.memory.InMemoryChatMemory
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository
+import org.springframework.ai.chat.memory.MessageWindowChatMemory
 import org.springframework.ai.document.Document
 import org.springframework.ai.embedding.BatchingStrategy
 import org.springframework.ai.embedding.EmbeddingModel
@@ -63,7 +64,7 @@ class AiConfig {
         return ChatClient.builder(openAiChatModel)
             .defaultAdvisors(
                 SimpleLoggerAdvisor(),
-                MessageChatMemoryAdvisor(chatMemory)
+                MessageChatMemoryAdvisor.builder(chatMemory).build()
             )
             .build()
     }
@@ -156,7 +157,7 @@ class AiConfig {
 
 
     @Bean
-    fun chatMemory() = InMemoryChatMemory()
+    fun chatMemory() = MessageWindowChatMemory.builder().build()
 
     @Bean
     @Primary

@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.modelcontextprotocol.client.McpSyncClient
 import org.springframework.ai.chat.client.ChatClient
-import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY
-import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY
+import org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID
 import org.springframework.ai.chat.prompt.PromptTemplate
 import org.springframework.ai.converter.BeanOutputConverter
 import org.springframework.ai.converter.StructuredOutputConverter
@@ -64,23 +63,25 @@ internal class AIController(
             .content()
 
 
-    @PostMapping("/ai/chat-no-tools")
+    /**
+     * Important: using tools via an mcp-server implies that the connection
+     * to the mcp-server is stateful. As such such an endpoint won't scale
+     * in a concurrent environment. mcp-servers should only be used
+     * on the client side, where dedicated, stateful connections to
+     * a mcp-server are fine.
+     */
+    @PostMapping("/ai/chat-with-mcp-server")
     fun chatNoTools(@RequestBody chatInput: ChatInput): String? {
-        val relatedDocuments = vectorStore
-            .similaritySearch(chatInput.message).orEmpty()
         return this.remoteChatClient
             .prompt()
-            .system(SYSTEM_PROMPT)
-            .user(createPrompt(chatInput.message, relatedDocuments))
+            .system(MCP_PROMPT)
+            .user(chatInput.message)
             .advisors{
-                it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
-                  .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
-            .tools("orderService")
-            //.tools(SyncMcpToolCallbackProvider(mcpSyncClients))
+                it.param(CONVERSATION_ID, chatInput.conversationId)}
+            .tools(SyncMcpToolCallbackProvider(mcpSyncClients))
             .call()
             .content()
     }
-
 
 
 
@@ -93,14 +94,11 @@ internal class AIController(
             .system(SYSTEM_PROMPT)
             .user(createPrompt(chatInput.message, relatedDocuments))
             .advisors{
-                it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatInput.conversationId)
-                    .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 50)}
+                it.param(CONVERSATION_ID, chatInput.conversationId) }
             .tools("orderService")
             .call()
             .content()
     }
-
-
 
 
     @PostMapping("/ai/speech")
@@ -159,73 +157,51 @@ internal class AIController(
 
 
     companion object {
-         val MCP_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
-Here's how to behave:
-- If the user wants to have some ideas about dishes run `complete-menu-italian-delaight-restaurant` to have the complete menu.
-- If the user gives food preferences or ingredients, use the `find-dishes-service` tool to find matching dishes.
-- before looking for preferred meals first run the `classify-prompt-if-food-or-other` tool to understand whether the prompt is about a food preference or not.
-- Propose ALL matching dishes from the `find-dishes-service` result.
-- If the customer confirms a dish, call the `order-dish-service` tool.
-- Once the order is placed, thank them and summarize the dish names with the estimated delivery time.
-
-Only use the tools to gather or act on information. Do not invent dishes. Be polite, helpful, and speak in a friendly English tone.
-""".trimIndent()
         const val SYSTEM_PROMPT = """
-        You are an Italian waiter. Respond in a friendly, helpful manner always in English.
-
-        Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
-
-        Initial Greeting: Always start the initial conversation with: 'Welcome to Italian DelAIght! How can I help you today?'. Don't use this phrase later in the conversation. 
-
-        Food Preferences: The customer  will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
-
-        Dish Suggestions:
-        Only if the user input is about food preferences use the context provided in the user message under 'Dish Context'.
-        Only propose dishes from this context; do not invent dishes yourself. Propose ALL the possible options from the context, but at least 3.
-        Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
-
-        Order:
-        When the client has made a choice trigger the 'orderService' function.
-
-        Once the function is successfully called, close the conversation with: "Thank you for your order"
-
-        Then summarize the ordered dishes without mentioning the ingredients and give a
-        time indication in minutes as returned by the 'orderService' function.
+            You are an Italian waiter. Respond in a friendly, helpful manner always in English.
+    
+            Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
+    
+            Initial Greeting: Always start the initial conversation with: 'Welcome to Italian DelAIght! How can I help you today?'. Don't use this phrase later in the conversation. 
+    
+            Food Preferences: The customer  will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
+    
+            Dish Suggestions:
+            Only if the user input is about food preferences use the context provided in the user message under 'Dish Context'.
+            Only propose dishes from this context; do not invent dishes yourself. Propose ALL the possible options from the context, but at least 3.
+            Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
+    
+            Order:
+            When the client has made a choice trigger the 'orderService' function.
+    
+            Once the function is successfully called, close the conversation with: "Thank you for your order"
+    
+            Then summarize the ordered dishes without mentioning the ingredients and give a
+            time indication in minutes as returned by the 'orderService' function.
         """
 
-        const val SYSTEM_PROMPT_ = """
-        You are an Italian waiter. Respond in a friendly, helpful manner always in English.
-
-        Objective: Assist the customer in choosing and ordering the best matching meal based on given food preferences.
-
-        Initial Greeting: Always start the initial conversation with: 'Welcome to Italian DelAIght! How can I help you today?'. Don't use this phrase later in the conversation. 
-
-        Food Preferences: The customer  will provide food preferences, such as specific dishes like Ravioli or Spaghetti, or ingredients like Cheese or Cream.
-
-        Dish Suggestions:
-        Only if the user input is about food preferences use the context provided in the user message under 'Dish Context'.
-        Only propose dishes from this context; do not invent dishes yourself. Propose ALL the possible options from the context.
-        Assist the customer in choosing one of the proposed dishes or encourage him/her to adjust their food preferences if needed.
-
-        Order:
-        When the client has made a choice trigger the 'orderService' function.
-
-        Once the function is successfully called, close the conversation with: "Thank you for your order"
-
-        Then summarize the ordered dishes without mentioning the ingredients and give a
-        time indication in minutes as returned by the 'orderService' function.
-        """
-
-
-        val USER_PROMPT = """       
+        val AUGMENTED_USER_PROMPT = """       
            User Query:
            {query}
 
-        Dish context:
-        {context}"""
+            Dish context:
+            {context}"""
+
+
+        val MCP_PROMPT = """ You are an Italian waiter AI who assists customers in choosing and ordering dishes.
+            Here's how to behave:
+            - If the user wants to have some ideas about dishes run `complete-menu-italian-delaight-restaurant` to have the complete menu.
+            - If the user gives food preferences or ingredients, use the `find-dishes-service` tool to find matching dishes.
+            - before looking for preferred meals first run the `classify-prompt-if-food-or-other` tool to understand whether the prompt is about a food preference or not.
+            - Propose ALL matching dishes from the `find-dishes-service` result.
+            - If the customer confirms a dish, call the `order-dish-service` tool.
+            - Once the order is placed, thank them and summarize the dish names with the estimated delivery time.
+            
+            Only use the tools to gather or act on information. Do not invent dishes. Be polite, helpful, and speak in a friendly English tone.
+            """.trimIndent()
 
         private fun createPrompt(query: String, context: List<Document>): String {
-            val promptTemplate = PromptTemplate(USER_PROMPT)
+            val promptTemplate = PromptTemplate(AUGMENTED_USER_PROMPT)
             promptTemplate.add("query", query)
             promptTemplate.add("context", context.map { "Dish: ${it.metadata["Name"] } Dish with Ingredients: ${it.text}" }.joinToString(prefix = "- ", separator = "\n - "))
             return promptTemplate.render()
