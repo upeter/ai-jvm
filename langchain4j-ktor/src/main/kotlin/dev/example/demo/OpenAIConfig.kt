@@ -1,13 +1,13 @@
 package dev.example.demo
 
-import dev.langchain4j.model.chat.ChatLanguageModel
-import dev.langchain4j.model.chat.StreamingChatLanguageModel
+import dev.langchain4j.model.chat.ChatModel
+import dev.langchain4j.model.chat.StreamingChatModel
 import dev.langchain4j.model.openai.OpenAiChatModel
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel
 import io.ktor.server.config.*
 import java.time.Duration
 
-fun configureChatLanguageModel(config: ApplicationConfig): ChatLanguageModel {
+fun configureChatModel(config: ApplicationConfig): ChatModel {
     val apiKey = config.property("api-key").getString()
     val modelName = config.property("model-name").getString()
     val temperature = config.property("temperature").getString().toDouble()
@@ -25,7 +25,7 @@ fun configureChatLanguageModel(config: ApplicationConfig): ChatLanguageModel {
         .build()
 }
 
-fun configureStreamingChatLanguageModel(config: ApplicationConfig): StreamingChatLanguageModel {
+fun configureStreamingChatModel(config: ApplicationConfig): StreamingChatModel {
     val apiKey = config.property("api-key").getString()
     val modelName = config.property("model-name").getString()
     

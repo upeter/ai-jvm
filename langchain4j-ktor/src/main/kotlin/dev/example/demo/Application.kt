@@ -44,8 +44,8 @@ fun Application.module() {
 
     // Configure OpenAI models
     val openAiConfig = environment.config.config("langchain4j.openai")
-    val chatLanguageModel = configureChatLanguageModel(openAiConfig.config("chat-model"))
-    val streamingChatLanguageModel = configureStreamingChatLanguageModel(openAiConfig.config("streaming-chat-model"))
+    val chatLanguageModel = configureChatModel(openAiConfig.config("chat-model"))
+    val streamingChatLanguageModel = configureStreamingChatModel(openAiConfig.config("streaming-chat-model"))
 
     // Configure routing
     routing {

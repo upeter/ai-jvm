@@ -6,11 +6,13 @@ version = "1.0"
 description = "AI try outs with Ktor"
 
 object Versions {
-    const val kotlin_version = "2.1.20"
+    const val kotlin_version = "2.1.21"
     const val kotlinx_version = "1.10.2"
     const val ktor_version = "3.1.2"
     const val jackson_version = "2.14.2"
-    const val langchain4j = "0.36.2"
+    const val langchain4j = "1.0.0"
+    const val langchain4j_glue = "1.0.1-beta6"
+    const val langchain4j_kotlin = "0.1.12"
     const val logback_version = "1.4.14"
 }
 
@@ -63,12 +65,13 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:${Versions.logback_version}")
 
     implementation("dev.langchain4j:langchain4j:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-open-ai:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.langchain4j}")
+    implementation("dev.langchain4j:langchain4j-open-ai:1.0.1")
+    implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.langchain4j_glue}")
+    implementation("me.kpavlov.langchain4j.kotlin:langchain4j-kotlin:${Versions.langchain4j_kotlin}")
     // These dependencies are not needed for the basic functionality
-    // implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j}")
-    // implementation("dev.langchain4j:langchain4j-pgvector:${Versions.langchain4j}")
-    // implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:${Versions.langchain4j}")
+    // implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j_glue}")
+    // implementation("dev.langchain4j:langchain4j-pgvector:${Versions.langchain4j_glue}")
+    // implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:${Versions.langchain4j_glue}")
 //    implementation("com.pgvector:pgvector:${Versions.pgvector}")
 //    implementation("org.postgresql:postgresql:${Versions.postgresql}")
 
