@@ -34,6 +34,7 @@ import org.springframework.ai.openai.api.OpenAiAudioApi.TranscriptResponseFormat
 import org.springframework.ai.openai.api.OpenAiImageApi
 import org.springframework.ai.retry.RetryUtils
 import org.springframework.ai.tool.ToolCallback
+import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.function.FunctionToolCallback
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.ai.vectorstore.observation.VectorStoreObservationConvention
@@ -47,6 +48,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.web.client.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Description
 import org.springframework.context.annotation.Primary
 import org.springframework.http.client.BufferingClientHttpRequestFactory
 import org.springframework.http.client.SimpleClientHttpRequestFactory
@@ -67,11 +69,6 @@ class AiConfig {
                 MessageChatMemoryAdvisor.builder(chatMemory).build()
             )
             .build()
-    }
-
-    @Bean
-    fun localChatClient(ollamaChatModel: OllamaChatModel): ChatClient {
-        return ChatClient.builder(ollamaChatModel).build()
     }
 
 
@@ -213,49 +210,19 @@ class AiConfig {
             .build()
     }
 
-    @Bean
-    fun menuService(vectorStore: VectorStore): ToolCallback {
-        return FunctionToolCallback.builder("menuService", MenuService(vectorStore))
-            .inputType(MenuRequest::class.java)
-            .description("Find matching dishes based on dish name or ingredients")
-            .build()
-    }
 }
 
 data class OrderRequest(val meals: List<String>)
 
 data class OrderResponse(val deliveredInMinutes: Int)
 
-val  orderService : (OrderRequest) -> OrderResponse =  { orderRequest ->
-        LoggerFactory.getLogger("OrderService").info(
-            "\n*****************************************************************************\n" +
-                    "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
-                    "*****************************************************************************\n\n"
-        )
-        OrderResponse(20)
+val orderService:(OrderRequest) -> OrderResponse =  { orderRequest ->
+    LoggerFactory.getLogger("OrderService").info(
+        "\n*****************************************************************************\n" +
+                "🍕🍕🍕 Ordering dishes: ${orderRequest.meals.joinToString("\n- ")} 🍕🍕🍕\n" +
+                "*****************************************************************************\n\n"
+    )
+    OrderResponse(20)
 
 }
-
-
-data class MenuRequest(val dish: String)
-
-data class MenuResponse(val menus: List<String>)
-
-class MenuService(val vectorStore: VectorStore) : (MenuRequest) -> MenuResponse {
-
-    override fun invoke(dish: MenuRequest): MenuResponse {
-        logger.info(
-            "\n-------------------------------------------------------------\n" +
-                    "🧑‍🍳Calling menu service 🧑‍🍳\n" +
-                    "-------------------------------------------------------------\n\n"
-        )
-        return MenuResponse(
-            vectorStore.similaritySearch(dish.dish).orEmpty()
-                .mapNotNull { "Dish: ${it.metadata["Name"]} Dish with Ingredients: ${it.text}" })
-    }
-
-}
-
-
-
 

@@ -14,6 +14,7 @@ import org.springframework.ai.openai.OpenAiAudioSpeechModel
 import org.springframework.ai.openai.OpenAiAudioTranscriptionModel
 import org.springframework.ai.openai.audio.speech.SpeechPrompt
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt
+import org.springframework.ai.tool.ToolCallback
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.core.io.InputStreamResource
@@ -31,7 +32,7 @@ internal class AIController(
     val openAiAudioTranscriptionModel: OpenAiAudioTranscriptionModel,
     val mcpSyncClients: List<McpSyncClient>,
     val remoteChatClient: ChatClient,
-    val localChatClient: ChatClient
+    val orderService: ToolCallback
 ) {
 
     @GetMapping("/ai/stream")
@@ -95,7 +96,7 @@ internal class AIController(
             .user(createPrompt(chatInput.message, relatedDocuments))
             .advisors{
                 it.param(CONVERSATION_ID, chatInput.conversationId) }
-            .tools("orderService")
+            .toolCallbacks(orderService)
             .call()
             .content()
     }
@@ -127,7 +128,7 @@ internal class AIController(
 
     @GetMapping("/ai/prompt-classifier")
     fun classifyPrompt(@RequestParam("prompt") prompt: String): PromptClassification? =
-        localChatClient.prompt()
+        remoteChatClient.prompt()
             .user{
                 it.text("Classify the following prompt as 'food' or 'other'. If it is about food, extract dish name and/or ingredients: {prompt}")
                     .param("prompt", prompt)}

@@ -1,7 +1,7 @@
 # Sources for KotlinConf 2025 talk 
 ## From 0 to H-AI-ro: fast track to AI for Kotlin developers.
 
-## Run the examples
+### Preparations
 - Install the Kotlin Notebooks plugin in IntelliJ
 - You need an OpenAI API key in your environment: ```OPENAI_API_KEY=<your-key>```
 
@@ -41,8 +41,16 @@
 - Run Samples in the notebook: [spring-ai-demo.ipynb](spring-ai/spring-ai-demo.ipynb)
 
 
-#### Run KMP chat / audio client
+### Run KMP chat / audio client
 - Run KMP Chat Client `main` in  [Main.kt](spring-ai/src/test/kotlin/dev/example/ChatClient.kt) in the `chatclient-kmp` module
+- Chat Feature: 
+  
+  <img src="kmp-app-chat.png" height="400">
+
+- Voice Feature:
+
+  <img src="kmp-app-voice.png" height="400">
+
 
 ### Kotlin MCP server + integration with Claude Desktop: `/kotlin-mcp-server`
 - MCP Server that exposes:
