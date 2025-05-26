@@ -45,11 +45,11 @@
 - Run KMP Chat Client `main` in  [Main.kt](spring-ai/src/test/kotlin/dev/example/ChatClient.kt) in the `chatclient-kmp` module
 - Chat Feature: 
   
-  <img src="kmp-app-chat.png" height="400">
+  <img src="kmp-app-chat.png" style="transform: scale(0.7); transform-origin: top left;">
 
 - Voice Feature:
 
-  <img src="kmp-app-voice.png" height="400">
+  <img src="kmp-app-voice.png" style="transform: scale(0.6); transform-origin: top left;">
 
 
 ### Kotlin MCP server + integration with Claude Desktop: `/kotlin-mcp-server`
@@ -59,16 +59,20 @@
   - **tools**: tools to classify, find dishes via vector search and ordering dish, all forwarding to the Spring-AI rest endpoints
 - Build the MCP Server with: `./gradlew jar`
 - Open the Claude Desktop application -> Settings -> Developer and press `Edit Config` to locate the `claude_desktop_config.json` file.
-  <img src="claude-mcp-config.png">
+  <img src="claude-mcp-config.png" style="transform: scale(0.8); transform-origin: top left;">
 - Add the following configuration in `claude_desktop_config.json`:
-  ```{
-  "mcpServers": {
-     "mcp-italian-delaight": {
-      "command": "java",
-      "args": ["-jar", "<project-path>/kotlin-mcp-server/build/libs/mcp-kt-jar-0.1.0.jar"]
-    }
+  ```
+  {
+   "mcpServers": {
+      "mcp-italian-delaight": {
+       "command": "java",
+       "args": ["-jar", "<project-path>/kotlin-mcp-server/build/libs/mcp-kt-jar-0.1.0.jar"]
+      }
+    } 
   }
-}```
+  
+
 - Restart Claude Desktop and manually select the `italian-meal-agent` prompt that the MCP server exposes: 
-  <img src="claude-prompt-selection.png">
+  
+- <img src="claude-prompt-selection.png"  style="transform: scale(0.8); transform-origin: top left;">
 - Now you can order your favorite dish. Buon Appetito 🍕🇮🇹🍝! 
