@@ -1,7 +1,5 @@
 package dev.example;
 
-import dev.example.demo.Assistant;
-import dev.example.demo.StreamingAssistant;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import org.springframework.web.bind.annotation.GetMapping;
