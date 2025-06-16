@@ -1,7 +1,6 @@
 package dev.example.demo
 
-import dev.langchain4j.model.chat.ChatLanguageModel
-import dev.langchain4j.model.chat.StreamingChatLanguageModel
+import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.service.SystemMessage
 import dev.langchain4j.service.spring.AiService
 import kotlinx.coroutines.flow.Flow
@@ -13,13 +12,13 @@ import reactor.core.publisher.Flux
 
 @RestController
 class AIController(
-    val chatLanguageModel: ChatLanguageModel,
+    val chatModel: ChatModel,
     val assistant: Assistant,
     val streamingAssistant: StreamingAssistant) {
 
     @GetMapping("/ai/ask")
     fun simpleChat(@RequestParam("message") message:String): String =
-        assistant.chat(message)
+        chatModel.chat(message)
 
     @GetMapping("/ai/ask/stream")
     fun streamChat(@RequestParam("message") message:String): Flow<String> =

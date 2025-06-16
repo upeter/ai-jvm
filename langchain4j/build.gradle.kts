@@ -1,4 +1,3 @@
-import Build_gradle.Versions.spring_version
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -20,15 +19,17 @@ buildscript {
 object Versions {
     const val kotlin_version = "2.0.0"
     const val kotlinx_version = "1.7.3"
-    const val spring_version = "3.3.0"
+    const val spring_version = "3.5.0"
     const val jackson_version = "2.14.2"
     const val arrow_version = "1.2.4"
-    const val langchain4j = "0.36.2"
+    const val langchain4j = "1.0.1"
+    const val spring_langchain4j = "1.0.1-beta6"
     const val pgvector = "0.1.3"
     const val postgresql = "42.6.0"
     const val dataframe = "0.13.1"
 
 }
+
 
 repositories {
     mavenCentral()
@@ -78,9 +79,6 @@ dependencies {
     }
     implementation("org.springframework.boot:spring-boot-starter-web:${Versions.spring_version}")
     implementation("org.springframework.boot:spring-boot-starter-webflux:${Versions.spring_version}")
-    //AI
-//    implementation(platform("io.springboot.ai:spring-ai-bom:${Versions.spring_ai_version}"))
-//    implementation("io.springboot.ai:spring-ai-openai-spring-boot-starter:${Versions.spring_ai_version}")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${Versions.jackson_version}")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${Versions.jackson_version}")
@@ -99,7 +97,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:${Versions.kotlin_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:${Versions.kotlinx_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinx_version}")
-    implementation("org.springframework.boot:spring-boot-starter-webflux:${spring_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:${Versions.kotlinx_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${Versions.kotlinx_version}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${Versions.kotlinx_version}")
@@ -108,21 +105,21 @@ dependencies {
 //    implementation("nz.ac.waikato.cms.weka:weka-stable:3.8.6")
 
     implementation("dev.langchain4j:langchain4j:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:${Versions.langchain4j}") {
+    implementation("dev.langchain4j:langchain4j-open-ai-spring-boot-starter:${Versions.spring_langchain4j}") {
         exclude("ch.qos.logback", "logback-classic")
     }
-    implementation("dev.langchain4j:langchain4j-spring-boot-starter:${Versions.langchain4j}") {
+    implementation("dev.langchain4j:langchain4j-spring-boot-starter:${Versions.spring_langchain4j}") {
         exclude("ch.qos.logback", "logback-classic")
     }
 
-    implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-pgvector:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:${Versions.langchain4j}")
+    implementation("dev.langchain4j:langchain4j-embeddings-all-minilm-l6-v2:${Versions.spring_langchain4j}")
+    implementation("dev.langchain4j:langchain4j-embeddings-bge-small-zh-v15-q:${Versions.spring_langchain4j}")
+    implementation("dev.langchain4j:langchain4j-pgvector:${Versions.spring_langchain4j}")
+    implementation("dev.langchain4j:langchain4j-document-parser-apache-pdfbox:${Versions.spring_langchain4j}")
     implementation("com.pgvector:pgvector:${Versions.pgvector}")
     implementation("org.postgresql:postgresql:${Versions.postgresql}")
     implementation("dev.langchain4j:langchain4j-open-ai:${Versions.langchain4j}")
-    implementation("dev.langchain4j:langchain4j-reactor:${Versions.langchain4j}")
+    implementation("dev.langchain4j:langchain4j-reactor:${Versions.spring_langchain4j}")
 
 
 

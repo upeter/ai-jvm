@@ -3,7 +3,7 @@ package dev.example.utils
 import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.UserMessage
 import dev.langchain4j.model.StreamingResponseHandler
-import dev.langchain4j.model.chat.StreamingChatLanguageModel
+import dev.langchain4j.model.chat.StreamingChatModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import org.slf4j.LoggerFactory
@@ -35,20 +35,5 @@ fun getDayPeriodAll(hourOfDay: Int): String {
         24, 0 -> "Midnight-0_1" // Specifically covers the transition at midnight from 12:00 AM to 1:00 AM
         else -> "Invalid-Hour"
     }
-}
-
-fun StreamingChatLanguageModel.generateStream(message: UserMessage): Flow<String> {
-    val sink: Sinks.Many<String> = Sinks.many().unicast().onBackpressureBuffer()
-    this.generate(message, object : StreamingResponseHandler<AiMessage> {
-        override fun onNext(token: String) {
-            sink.tryEmitNext(token)
-        }
-
-        override fun onError(error: Throwable) {
-            sink.tryEmitError(error)
-        }
-    })
-
-    return sink.asFlux().asFlow()
 }
 
