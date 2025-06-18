@@ -18,7 +18,7 @@ group = "org.example"
 version = "0.1.0"
 
 
-val mcpVersion = "0.6.0"
+val mcpVersion = "0.5.0"
 val slf4jVersion = "2.0.9"
 val ktorVersion = "3.1.1"
 dependencies {
