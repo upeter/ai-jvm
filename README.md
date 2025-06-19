@@ -1,5 +1,4 @@
-# Sources for KotlinConf 2025 talk 
-## From 0 to H-AI-ro: fast track to AI for Kotlin developers.
+# Sources Conference Talk: From 0 to H-AI-ro: fast track to AI for Kotlin developers.
 
 ### Preparations
 - Install the Kotlin Notebooks plugin in IntelliJ
